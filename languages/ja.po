@@ -1,0 +1,22 @@
+# Translation of Taxo - Development in Japanese
+# @package Wpinc Taxo
+# @author Takuto Yanagida
+# @version 2022-01-14
+
+# Ordered Term -----------------------------------------------------------------
+
+msgctxt "ordered term"
+msgid "Order"
+msgstr "順序"
+
+# Singular Name ----------------------------------------------------------------
+
+msgctxt "singular name"
+msgid "Name (Singular Form)"
+msgstr "名前（単数形）"
+
+# Term Content -----------------------------------------------------------------
+
+msgctxt "term content"
+msgid "Content"
+msgstr "コンテンツ"

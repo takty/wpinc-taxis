@@ -148,7 +148,7 @@ function _cb_taxonomy_edit_form_fields( \WP_Term $term ) {
 	?>
 	<tr class="form-field">
 		<th>
-			<label for="<?php echo esc_attr( $key ); ?>"><?php esc_html_e( 'Order', 'default' ); ?></label>
+			<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html_x( 'Order', 'ordered term', 'taxo' ); ?></label>
 		</th>
 		<td>
 			<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" size="40" value="<?php echo esc_attr( $val ); ?>">
@@ -235,7 +235,7 @@ function _cb_quick_edit_custom_box( string $column_name, string $post_type, stri
 	<fieldset>
 		<div id="<?php echo esc_attr( $inst->key_order ); ?>-content" class="inline-edit-col">
 			<label>
-				<span class="title"><?php esc_html_e( 'Order', 'default' ); ?></span>
+				<span class="title"><?php echo esc_html_x( 'Order', 'ordered term', 'taxo' ); ?></span>
 				<span class="input-text-wrap"><input type="text" name="<?php echo esc_attr( $column_name ); ?>" class="ptitle" value=""></span>
 			</label>
 		</div>

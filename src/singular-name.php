@@ -58,9 +58,7 @@ function _cb_tx_edit_form_fields( \WP_Term $term, string $taxonomy ) {
 	?>
 	<tr class="form-field">
 		<th>
-			<label for="<?php echo esc_attr( $key ); ?>">
-				<?php echo esc_html_x( 'Name', 'term name', 'default' ); ?> (Singular Form)
-			</label>
+			<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html_x( 'Name (Singular Form)', 'singular name', 'taxo' ); ?></label>
 		</th>
 		<td>
 			<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" size="40" value="<?php echo esc_attr( $val ); ?>">
