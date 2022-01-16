@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-11
+ * @version 2022-01-16
  */
 
 namespace wpinc\taxo;
@@ -15,17 +15,17 @@ namespace wpinc\taxo;
  * @param array $args {
  *     Arguments.
  *
- *     @type string 'taxonomy'        Taxonomy.
- *     @type array  'slug_to_label'   An array of slug to label. Default empty.
- *     @type bool   'do_force_update' Whether to force update. Default false.
- *     @type ?array 'meta' {
+ *     @type string     'taxonomy'        Taxonomy.
+ *     @type array      'slug_to_label'   An array of slug to label. Default empty.
+ *     @type bool       'do_force_update' Whether to force update. Default false.
+ *     @type array|null 'meta' {
  *         (Optional) Term meta arguments.
  *
  *         @type string 'delimiter' Delimiter of meta values.
  *         @type array  'keys'      An array of term meta keys.
  *     }
- *     @type ?array 'orders'          An array of pairs of initial value and increment value.
- *     @type string 'order_key'       (Optional) Default '_menu_order'.
+ *     @type array|null 'orders'          An array of pairs of initial value and increment value.
+ *     @type string     'order_key'       (Optional) Default '_menu_order'.
  * }
  */
 function add_terms( array $args ) {

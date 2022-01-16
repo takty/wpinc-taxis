@@ -64,7 +64,7 @@ function activate( array $args = array() ) {
 /**
  * Retrieves term order.
  *
- * @param \WP_Term|int $term_id_obj Term object or term ID.
+ * @param int|\WP_Term $term_id_obj Term object or term ID.
  * @return int Order.
  */
 function get_order( $term_id_obj ): int {
@@ -289,16 +289,16 @@ function _cb_get_the_terms( $terms, int $post_id, string $taxonomy ) {
 /**
  * Sorts terms.
  *
- * @param \WP_Term[]|int[] $terms_or_term_ids Array of WP_Terms or term_ids.
- * @param string           $taxonomy Taxonomy slug.
+ * @param int[]|\WP_Term[] $terms_id_obj Array of WP_Terms or term_ids.
+ * @param string           $taxonomy     Taxonomy slug.
  */
-function sort_terms( array $terms_or_term_ids, string $taxonomy ): array {
+function sort_terms( array $terms_id_obj, string $taxonomy ): array {
 	$inst = _get_instance();
 	if ( ! in_array( $taxonomy, $inst->txs, true ) ) {
-		return $terms_or_term_ids;
+		return $terms_id_obj;
 	}
 	$tos = array();
-	foreach ( $terms_or_term_ids as $t ) {
+	foreach ( $terms_id_obj as $t ) {
 		$tid   = is_int( $t ) ? $t : $t->term_id;
 		$idx   = (int) get_term_meta( $tid, $inst->key_order, true );
 		$tos[] = array( $idx, $t );
