@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-14
+ * @version 2022-01-16
  */
 
 namespace wpinc\taxo\singular_name;
@@ -19,7 +19,7 @@ namespace wpinc\taxo\singular_name;
  *     @type string 'singular_name_key' Key of term metadata for default singular names. Default '_singular_name'.
  * }
  */
-function enable_singular_name( array $args ) {
+function enable_singular_name( array $args ): void {
 	$args += array(
 		'taxonomies'        => array(),
 		'singular_name_key' => '_singular_name',
@@ -52,7 +52,7 @@ function enable_singular_name( array $args ) {
  * @param \WP_Term $term     Current taxonomy term object.
  * @param string   $taxonomy Current taxonomy slug.
  */
-function _cb_tx_edit_form_fields( \WP_Term $term, string $taxonomy ) {
+function _cb_tx_edit_form_fields( \WP_Term $term, string $taxonomy ): void {
 	$key = _get_instance()->key;
 	$val = get_term_meta( $term->term_id, $key, true );
 	?>
@@ -107,7 +107,7 @@ function _cb_get_taxonomy( \WP_Term $t ): \WP_Term {
  * @param \WP_Term $t        Term object.
  * @param string   $taxonomy The taxonomy slug.
  */
-function _add_singular_name( \WP_Term $t, string $taxonomy ) {
+function _add_singular_name( \WP_Term $t, string $taxonomy ): void {
 	if ( ! isset( $t->singular_name ) ) {
 		$sn = get_term_meta( $t->term_id, _get_instance()->key, true );
 

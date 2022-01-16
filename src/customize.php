@@ -15,7 +15,7 @@ namespace wpinc\taxo;
  * @param string|string[] $taxonomy_s A taxonomy slug or array of taxonomy slugs.
  * @param string          $post_type  Post type.
  */
-function set_taxonomy_post_type_specific( $taxonomy_s, string $post_type ) {
+function set_taxonomy_post_type_specific( $taxonomy_s, string $post_type ): void {
 	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 	add_action(
 		'pre_get_posts',
@@ -41,7 +41,7 @@ function set_taxonomy_post_type_specific( $taxonomy_s, string $post_type ) {
  * @param string               $default_term_slug Default term slug.
  * @param string|string[]|null $post_type         (Optional) A post type or array of post types.
  */
-function set_taxonomy_default_term( string $taxonomy, string $default_term_slug, $post_type = null ) {
+function set_taxonomy_default_term( string $taxonomy, string $default_term_slug, $post_type = null ): void {
 	if ( $post_type ) {
 		$pts = is_array( $post_type ) ? $post_type : array( $post_type );
 		foreach ( $pts as $post_type ) {
@@ -73,7 +73,7 @@ function set_taxonomy_default_term( string $taxonomy, string $default_term_slug,
  * @param string $taxonomy          Taxonomy slug.
  * @param string $default_term_slug Default term slug.
  */
-function _cb_save_post__set_taxonomy_default_term( int $post_id, string $taxonomy, string $default_term_slug ) {
+function _cb_save_post__set_taxonomy_default_term( int $post_id, string $taxonomy, string $default_term_slug ): void {
 	$ts = wp_get_object_terms( $post_id, $taxonomy );
 	if ( ! is_wp_error( $ts ) && empty( $ts ) ) {
 		wp_set_object_terms( $post_id, $default_term_slug, $taxonomy );
@@ -83,10 +83,10 @@ function _cb_save_post__set_taxonomy_default_term( int $post_id, string $taxonom
 /**
  * Sets taxonomies to be exclusive.
  *
- * @param string|string[] $taxonomy A taxonomy slug or array of taxonomy slugs.
+ * @param string|string[] $taxonomy_s A taxonomy slug or array of taxonomy slugs.
  */
-function set_taxonomy_exclusive( $taxonomy ) {
-	$txs = is_array( $taxonomy ) ? $taxonomy : array( $taxonomy );
+function set_taxonomy_exclusive( $taxonomy_s ): void {
+	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 	add_action(
 		'admin_print_footer_scripts',
 		function () use ( $txs ) {
@@ -108,7 +108,7 @@ function set_taxonomy_exclusive( $taxonomy ) {
  *
  * @param array $txs Taxonomies.
  */
-function _cb_admin_print_footer_scripts__set_taxonomy_exclusive( array $txs ) {
+function _cb_admin_print_footer_scripts__set_taxonomy_exclusive( array $txs ): void {
 	?>
 	<script type="text/javascript">
 	jQuery(function ($) {
@@ -172,7 +172,7 @@ function _cb_admin_print_footer_scripts__set_taxonomy_exclusive( array $txs ) {
  * @param array  $old_tt_ids Old array of term taxonomy IDs.
  * @param array  $txs        Taxonomies.
  */
-function _cb_set_object_terms__set_taxonomy_exclusive( int $object_id, array $terms, array $tt_ids, string $taxonomy, bool $append, array $old_tt_ids, array $txs ) {
+function _cb_set_object_terms__set_taxonomy_exclusive( int $object_id, array $terms, array $tt_ids, string $taxonomy, bool $append, array $old_tt_ids, array $txs ): void {
 	if ( in_array( $taxonomy, $txs, true ) ) {
 		$ai = array_intersect( $old_tt_ids, $tt_ids );
 		if ( ! empty( $ai ) && count( $ai ) !== count( $tt_ids ) ) {

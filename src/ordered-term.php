@@ -14,7 +14,7 @@ namespace wpinc\taxo\ordered_term;
  *
  * @param string|string[] $taxonomy_s A taxonomy slug or an array of taxonomy slugs.
  */
-function add_taxonomy( $taxonomy_s ) {
+function add_taxonomy( $taxonomy_s ): void {
 	$txs  = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 	$inst = _get_instance();
 
@@ -30,7 +30,7 @@ function add_taxonomy( $taxonomy_s ) {
  *     @type string 'order_key' Key of term metadata for order. Default '_menu_order'.
  * }
  */
-function activate( array $args = array() ) {
+function activate( array $args = array() ): void {
 	static $activated = 0;
 	if ( $activated++ ) {
 		return;
@@ -135,7 +135,7 @@ function _cb_manage_taxonomy_custom_column( string $string, string $column_name,
  * @access private
  * @param \WP_Term $term Current taxonomy term object.
  */
-function _cb_taxonomy_edit_form_fields( \WP_Term $term ) {
+function _cb_taxonomy_edit_form_fields( \WP_Term $term ): void {
 	$inst = _get_instance();
 	$idx  = get_term_meta( $term->term_id, $inst->key_order, true );
 	$val  = ( false !== $idx ) ? $idx : '';
@@ -160,7 +160,7 @@ function _cb_taxonomy_edit_form_fields( \WP_Term $term ) {
  * @param int $term_id Term ID.
  * @param int $tt_id   Term taxonomy ID.
  */
-function _cb_edited_taxonomy( int $term_id, int $tt_id ) {
+function _cb_edited_taxonomy( int $term_id, int $tt_id ): void {
 	$inst = _get_instance();
 	$val  = $_POST[ $inst->key_order ] ?? null;  // phpcs:ignore
 	if ( null !== $val ) {
@@ -177,7 +177,7 @@ function _cb_edited_taxonomy( int $term_id, int $tt_id ) {
  *
  * @access private
  */
-function _cb_admin_head() {
+function _cb_admin_head(): void {
 	$inst = _get_instance();
 	$tx   = $_GET[ 'taxonomy'] ?? null;  // phpcs:ignore
 	global $pagenow;
@@ -216,10 +216,10 @@ function _cb_admin_head() {
  * @param string $post_type   The post type slug, or current screen name if this is a taxonomy list table.
  * @param string $taxonomy    The taxonomy name, if any.
  */
-function _cb_quick_edit_custom_box( string $column_name, string $post_type, string $taxonomy ) {
+function _cb_quick_edit_custom_box( string $column_name, string $post_type, string $taxonomy ): void {
 	$inst = _get_instance();
 	if ( $column_name !== $inst->key_order || ! in_array( $taxonomy, $inst->txs, true ) ) {
-		return false;
+		return;
 	}
 	static $print_nonce = true;
 	if ( $print_nonce ) {
@@ -326,7 +326,7 @@ function sort_terms( array $terms_id_obj, string $taxonomy ): array {
  *
  * @param string|string[] $post_type_s A post type or array of post types.
  */
-function enable_post_term_order( $post_type_s ) {
+function enable_post_term_order( $post_type_s ): void {
 	$pts  = is_array( $post_type_s ) ? $post_type_s : array( $post_type_s );
 	$inst = _get_instance();
 
@@ -355,7 +355,7 @@ function get_post_meta_key_of_post_term_order( string $taxonomy ): string {
  *
  * @param int $post_id Post ID.
  */
-function _cb_save_post( int $post_id ) {
+function _cb_save_post( int $post_id ): void {
 	$inst = _get_instance();
 
 	$post_type = get_post_type( $post_id );
@@ -375,7 +375,7 @@ function _cb_save_post( int $post_id ) {
  * @param int $term_id Term ID.
  * @param int $tt_id   Term taxonomy ID.
  */
-function _cb_edited_taxonomy__post_term_order( int $term_id, int $tt_id ) {
+function _cb_edited_taxonomy__post_term_order( int $term_id, int $tt_id ): void {
 	$inst = _get_instance();
 	$t    = get_term_by( 'term_taxonomy_id', $tt_id );
 
@@ -405,7 +405,7 @@ function _cb_edited_taxonomy__post_term_order( int $term_id, int $tt_id ) {
  * @param int    $post_id  Post ID.
  * @param string $taxonomy Taxonomy slug.
  */
-function _update_order_post_meta( int $post_id, string $taxonomy ) {
+function _update_order_post_meta( int $post_id, string $taxonomy ): void {
 	$key = get_post_meta_key_of_post_term_order( $taxonomy );
 	$ts  = wp_get_post_terms( $post_id, $taxonomy );
 	if ( is_wp_error( $ts ) || empty( $ts ) ) {

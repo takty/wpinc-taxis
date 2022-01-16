@@ -28,7 +28,7 @@ namespace wpinc\taxo;
  *     @type string     'order_key'       (Optional) Default '_menu_order'.
  * }
  */
-function add_terms( array $args ) {
+function add_terms( array $args ): void {
 	$args += array(
 		'taxonomy'        => '',
 		'slug_to_label'   => array(),
@@ -57,7 +57,7 @@ function add_terms( array $args ) {
  * @param int   $parent_idx    Index of the parent term. Default 0.
  * @param int   $depth         Depth of order. Default 0.
  */
-function _add_terms( array $args, array $slug_to_label, int $parent_id = 0, int $parent_idx = 0, int $depth = 0 ) {
+function _add_terms( array $args, array $slug_to_label, int $parent_id = 0, int $parent_idx = 0, int $depth = 0 ): void {
 	$cur_order = ( $args['orders'] ) ? array( 1, 1 ) : $args['orders'][ $depth ];
 
 	list( $order_bgn, $order_inc ) = $cur_order;

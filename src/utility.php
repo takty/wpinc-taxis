@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-11
+ * @version 2022-01-16
  */
 
 namespace wpinc\taxo;
@@ -17,7 +17,7 @@ namespace wpinc\taxo;
  * @param string $suffix    Suffix of taxonomy slug and rewrite slug.
  * @param string $slug      (Optional) Prefix of rewrite slug. Default is $post_type.
  */
-function register_post_type_specific_taxonomy( array $args, string $post_type, string $suffix = 'category', string $slug = null ) {
+function register_post_type_specific_taxonomy( array $args, string $post_type, string $suffix = 'category', string $slug = null ): void {
 	$slug  = $slug ?? $post_type;
 	$args += array(
 		'show_admin_column' => true,

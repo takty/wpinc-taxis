@@ -184,7 +184,7 @@ function get_the_term_list( $post_id_obj, string $taxonomy, array $args ): strin
  *     @type callable   'filter'       Filter function for escaping for HTML.
  * }
  */
-function the_term_list( $post_id_obj, string $taxonomy, array $args ) {
+function the_term_list( $post_id_obj, string $taxonomy, array $args ): void {
 	echo wp_kses_post( get_the_term_list( $post_id_obj, $taxonomy, $args ) );
 }
 

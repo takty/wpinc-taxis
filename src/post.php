@@ -12,7 +12,7 @@ namespace wpinc\taxo;
 /**
  * Enables 'taxonomy' and 'term' arguments of wp_get_archives.
  */
-function limit_archive_links_by_terms() {
+function limit_archive_links_by_terms(): void {
 	add_filter(
 		'getarchives_join',
 		function ( string $join, array $parsed_args ) use ( $post_type ) {
@@ -52,7 +52,7 @@ function limit_archive_links_by_terms() {
  * @param string|string[] $taxonomy_s A taxonomy slug or array of taxonomy slugs.
  * @param string          $post_type  Post type.
  */
-function limit_adjacent_post_with_multiple_taxonomy( $taxonomy_s, string $post_type ) {
+function limit_adjacent_post_with_multiple_taxonomy( $taxonomy_s, string $post_type ): void {
 	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 
 	foreach ( array( 'next', 'previous' ) as $adj ) {
@@ -86,7 +86,7 @@ function limit_adjacent_post_with_multiple_taxonomy( $taxonomy_s, string $post_t
  * @param array    $target_txs       Target taxonomies.
  * @param string   $target_post_type Target post type.
  */
-function _cb_get_adjacent_post_join( string $join, bool $in_same_term, array $excluded_terms, string $taxonomy, \WP_Post $post, array $target_txs, string $target_post_type ) {
+function _cb_get_adjacent_post_join( string $join, bool $in_same_term, array $excluded_terms, string $taxonomy, \WP_Post $post, array $target_txs, string $target_post_type ): string {
 	if ( ! $in_same_term || $post->post_type !== $target_post_type ) {
 		return $join;
 	}
@@ -109,7 +109,7 @@ function _cb_get_adjacent_post_join( string $join, bool $in_same_term, array $ex
  * @param array    $target_txs       Target taxonomies.
  * @param string   $target_post_type Target post type.
  */
-function _cb_get_adjacent_post_where( string $where, bool $in_same_term, array $excluded_terms, string $taxonomy, \WP_Post $post, array $target_txs, string $target_post_type ) {
+function _cb_get_adjacent_post_where( string $where, bool $in_same_term, array $excluded_terms, string $taxonomy, \WP_Post $post, array $target_txs, string $target_post_type ): string {
 	if ( ! $in_same_term || $post->post_type !== $target_post_type ) {
 		return $where;
 	}
@@ -164,7 +164,7 @@ function count_post_with_term( \WP_Term $term, array $posts ): array {
  * @param \WP_Term $term    Term.
  * @param array    $ts_pids An array of term slug to post IDs.
  */
-function _count_post_with_child_term( \WP_Term $term, array &$ts_pids ) {
+function _count_post_with_child_term( \WP_Term $term, array &$ts_pids ): void {
 	$child = get_terms(
 		$term->taxonomy,
 		array(

@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-11
+ * @version 2022-01-16
  */
 
 namespace wpinc\taxo;
@@ -17,7 +17,7 @@ namespace wpinc\taxo;
  * @param string $label_postfix The postfix shown after label 'Content'. Default empty.
  * @param int    $priority      Priority of action '{$taxonomy}_edit_form_fields'. Default 10.
  */
-function add_term_content_field( string $taxonomy, string $key, string $label_postfix = '', int $priority = 10 ) {
+function add_term_content_field( string $taxonomy, string $key, string $label_postfix = '', int $priority = 10 ): void {
 	add_action(
 		"{$taxonomy}_edit_form_fields",
 		function ( $term ) use ( $key, $label_postfix ) {
