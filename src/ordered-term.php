@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-14
+ * @version 2022-01-16
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -14,7 +14,7 @@ namespace wpinc\taxo\ordered_term;
  *
  * @param string|string[] $taxonomy_s A taxonomy slug or an array of taxonomy slugs.
  */
-function add_taxonomy( mixed $taxonomy_s ) {
+function add_taxonomy( $taxonomy_s ) {
 	$txs  = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 	$inst = _get_instance();
 
@@ -64,17 +64,12 @@ function activate( array $args = array() ) {
 /**
  * Retrieves term order.
  *
- * @param \WP_Term|int $term_or_term_id Term object or term ID.
+ * @param \WP_Term|int $term_id_obj Term object or term ID.
  * @return int Order.
  */
-function get_order( mixed $term_or_term_id ): int {
-	$inst = _get_instance();
-
-	if ( is_numeric( $term_or_term_id ) ) {
-		$term_id = $term_or_term_id;
-	} else {
-		$term_id = $term_or_term_id->term_id;
-	}
+function get_order( $term_id_obj ): int {
+	$inst    = _get_instance();
+	$term_id = is_numeric( $term_id_obj ) ? $term_id_obj : $term_id_obj->term_id;
 	return (int) get_term_meta( $term_id, $inst->key_order, true );
 }
 
@@ -279,12 +274,12 @@ function _cb_terms_clauses( array $pieces, array $txs, array $args ): array {
 /**
  * Callback function for 'get_the_terms' filter.
  *
- * @param WP_Term[]|WP_Error $terms    Array of attached terms, or WP_Error on failure.
- * @param int                $post_id  Post ID.
- * @param string             $taxonomy Taxonomy slug.
+ * @param \WP_Term[]|\WP_Error $terms    Array of attached terms, or WP_Error on failure.
+ * @param int                  $post_id  Post ID.
+ * @param string               $taxonomy Taxonomy slug.
  * @return mixed Filtered terms.
  */
-function _cb_get_the_terms( mixed $terms, int $post_id, string $taxonomy ) {
+function _cb_get_the_terms( $terms, int $post_id, string $taxonomy ) {
 	if ( ! is_wp_error( $terms ) ) {
 		$terms = sort_terms( $terms, $taxonomy );
 	}
@@ -329,10 +324,10 @@ function sort_terms( array $terms_or_term_ids, string $taxonomy ): array {
 /**
  * Enables post term order.
  *
- * @param string|string[] $post_type A post type or array of post types.
+ * @param string|string[] $post_type_s A post type or array of post types.
  */
-function enable_post_term_order( mixed $post_type ) {
-	$pts  = is_array( $post_type ) ? $post_type : array( $post_type );
+function enable_post_term_order( $post_type_s ) {
+	$pts  = is_array( $post_type_s ) ? $post_type_s : array( $post_type_s );
 	$inst = _get_instance();
 
 	foreach ( $pts as $pt ) {

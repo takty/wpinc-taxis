@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-11
+ * @version 2022-01-16
  */
 
 namespace wpinc\taxo;
@@ -42,7 +42,7 @@ function get_term_name( \WP_Term $term, bool $singular = false ): string {
  * @param bool         $singular Whether to get singular name. Default false.
  * @return string[] Array of term names on success.
  */
-function get_term_names( mixed $taxonomy, bool $singular = false ): array {
+function get_term_names( $taxonomy, bool $singular = false ): array {
 	if ( ! is_array( $taxonomy ) ) {
 		$taxonomy = array( 'taxonomy' => $taxonomy );
 	}
@@ -61,13 +61,13 @@ function get_term_names( mixed $taxonomy, bool $singular = false ): array {
 /**
  * Retrieves the names of the terms attached to the post.
  *
- * @param int|\WP_Post $post     Post ID or object.
- * @param string       $taxonomy Taxonomy slug.
- * @param bool         $singular Whether to get singular name. Default false.
+ * @param int|\WP_Post $post_id_obj Post ID or object.
+ * @param string       $taxonomy    Taxonomy slug.
+ * @param bool         $singular    Whether to get singular name. Default false.
  * @return string[] Array of term names on success.
  */
-function get_the_term_names( mixed $post, string $taxonomy, bool $singular = false ): array {
-	$ts = get_the_terms( $post, $taxonomy );
+function get_the_term_names( $post_id_obj, string $taxonomy, bool $singular = false ): array {
+	$ts = get_the_terms( $post_id_obj, $taxonomy );
 	if ( ! is_array( $ts ) ) {
 		return array();
 	}
@@ -129,8 +129,8 @@ function get_term_list( array $args_get_terms, array $args ): string {
 /**
  * Makes the term list.
  *
- * @param int|\WP_Post $post     Post ID or object.
- * @param string       $taxonomy Taxonomy slug.
+ * @param int|\WP_Post $post_id_obj Post ID or object.
+ * @param string       $taxonomy    Taxonomy slug.
  * @param array        $args {
  *     Arguments.
  *
@@ -144,8 +144,8 @@ function get_term_list( array $args_get_terms, array $args ): string {
  * }
  * @return string The term list.
  */
-function get_the_term_list( mixed $post, string $taxonomy, array $args ): string {
-	$ts = get_the_terms( $post, $taxonomy );
+function get_the_term_list( $post_id_obj, string $taxonomy, array $args ): string {
+	$ts = get_the_terms( $post_id_obj, $taxonomy );
 	if ( ! is_array( $ts ) ) {
 		return '';
 	}
@@ -170,8 +170,8 @@ function get_the_term_list( mixed $post, string $taxonomy, array $args ): string
 /**
  * Outputs the term list.
  *
- * @param int|\WP_Post $post     Post ID or object.
- * @param string       $taxonomy Taxonomy slug.
+ * @param int|\WP_Post $post_id_obj Post ID or object.
+ * @param string       $taxonomy    Taxonomy slug.
  * @param array        $args {
  *     Arguments.
  *
@@ -184,8 +184,8 @@ function get_the_term_list( mixed $post, string $taxonomy, array $args ): string
  *     @type callable   'filter'       Filter function for escaping for HTML.
  * }
  */
-function the_term_list( mixed $post, string $taxonomy, array $args ) {
-	echo wp_kses_post( get_the_term_list( $post, $taxonomy, $args ) );
+function the_term_list( $post_id_obj, string $taxonomy, array $args ) {
+	echo wp_kses_post( get_the_term_list( $post_id_obj, $taxonomy, $args ) );
 }
 
 /**

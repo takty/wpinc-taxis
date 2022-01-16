@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-14
+ * @version 2022-01-16
  */
 
 namespace wpinc\taxo;
@@ -52,7 +52,7 @@ function limit_archive_links_by_terms() {
  * @param string|string[] $taxonomy_s A taxonomy slug or array of taxonomy slugs.
  * @param string          $post_type  Post type.
  */
-function limit_adjacent_post_with_multiple_taxonomy( mixed $taxonomy_s, string $post_type ) {
+function limit_adjacent_post_with_multiple_taxonomy( $taxonomy_s, string $post_type ) {
 	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 
 	foreach ( array( 'next', 'previous' ) as $adj ) {

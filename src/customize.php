@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-14
+ * @version 2022-01-16
  */
 
 namespace wpinc\taxo;
@@ -15,7 +15,7 @@ namespace wpinc\taxo;
  * @param string|string[] $taxonomy_s A taxonomy slug or array of taxonomy slugs.
  * @param string          $post_type  Post type.
  */
-function set_taxonomy_post_type_specific( mixed $taxonomy_s, string $post_type ) {
+function set_taxonomy_post_type_specific( $taxonomy_s, string $post_type ) {
 	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 	add_action(
 		'pre_get_posts',
@@ -41,7 +41,7 @@ function set_taxonomy_post_type_specific( mixed $taxonomy_s, string $post_type )
  * @param string               $default_term_slug Default term slug.
  * @param string|string[]|null $post_type         (Optional) A post type or array of post types.
  */
-function set_taxonomy_default_term( string $taxonomy, string $default_term_slug, ?mixed $post_type = null ) {
+function set_taxonomy_default_term( string $taxonomy, string $default_term_slug, $post_type = null ) {
 	if ( $post_type ) {
 		$pts = is_array( $post_type ) ? $post_type : array( $post_type );
 		foreach ( $pts as $post_type ) {

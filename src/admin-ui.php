@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-11
+ * @version 2022-01-16
  */
 
 namespace wpinc\taxo;
@@ -78,7 +78,7 @@ function disable_taxonomy_metabox_sorting() {
  *
  * @param string|string[] $taxonomy_s A taxonomy slug or an array of taxonomy slugs.
  */
-function remove_term_description( mixed $taxonomy_s ) {
+function remove_term_description( $taxonomy_s ) {
 	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 	add_action(
 		'admin_head',
