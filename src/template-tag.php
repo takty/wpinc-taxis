@@ -4,15 +4,10 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-16
+ * @version 2022-01-25
  */
 
 namespace wpinc\taxo;
-
-require_once __DIR__ . '/../util/text.php';
-require_once __DIR__ . '/../util/url.php';
-require_once __DIR__ . '/../util/query.php';
-require_once __DIR__ . '/loop.php';
 
 /**
  * Retrieves term name.
@@ -259,5 +254,8 @@ function make_term_list( array $args = array() ): array {
 			$links[] = "<span $cls>$name</span>";
 		}
 	}
-	return apply_filters( "term_links-{$terms[0]->taxonomy}", $links );  // phpcs:ignore
+	if ( ! empty( $args['terms'] ) ) {
+		$links = apply_filters( "term_links-{$args['terms'][0]->taxonomy}", $links );  // phpcs:ignore
+	}
+	return $links;
 }
