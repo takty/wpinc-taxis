@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-16
+ * @version 2022-01-26
  */
 
 namespace wpinc\taxo;
@@ -43,15 +43,15 @@ function _cb_admin_head__simplify_taxonomy_metabox( array $taxonomies, array $po
 				$s .= '.categorydiv div.tabs-panel{border:none;padding:0;}';
 				$s .= '.categorychecklist{margin-top:4px;}';
 			} else {
-				foreach ( $taxonomies as $tax ) {
-					$s .= "#$tax-adder,#$tax-tabs{display:none;}";
-					$s .= "#$tax-all{border:none;padding:0;}";
-					$s .= "#{$tax}checklist{margin-top:4px;}";
+				foreach ( $taxonomies as $tx ) {
+					$s .= "#$tx-adder,#$tx-tabs{display:none;}";
+					$s .= "#$tx-all{border:none;padding:0;}";
+					$s .= "#{$tx}checklist{margin-top:4px;}";
 				}
 			}
 			// For Gutenberg.
 			$s .= '.editor-post-taxonomies__hierarchical-terms-add{display:none;}';
-			echo wp_kses_post( '<style type="text/css">' . $s . '</style>' );
+			echo wp_kses( '<style>' . $s . '</style>', array( 'style' => array() ) );
 		}
 	}
 }

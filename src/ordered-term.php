@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-16
+ * @version 2022-01-26
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -362,8 +362,8 @@ function _cb_save_post( int $post_id ): void {
 	if ( ! in_array( $post_type, $inst->post_term_order_post_types, true ) ) {
 		return;
 	}
-	foreach ( $inst->txs as $tax ) {
-		_update_order_post_meta( $post_id, $tax );
+	foreach ( $inst->txs as $tx ) {
+		_update_order_post_meta( $post_id, $tx );
 	}
 }
 
