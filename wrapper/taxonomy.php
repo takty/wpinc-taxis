@@ -7,7 +7,7 @@
  * @version 2022-02-07
  */
 
-namespace sample\taxonomy {
+namespace sample {
 	require_once __DIR__ . '/taxo/adder.php';
 	require_once __DIR__ . '/taxo/admin-ui.php';
 	require_once __DIR__ . '/taxo/customize.php';
@@ -336,7 +336,7 @@ namespace sample\taxonomy {
 	}
 }
 
-namespace sample\taxonomy\ordered_term {
+namespace sample\ordered_term {
 	require_once __DIR__ . '/taxo/ordered-term.php';
 
 	/**
