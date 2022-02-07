@@ -59,7 +59,7 @@ namespace wpinc\taxo\singular_name {
 		?>
 		<tr class="form-field">
 			<th>
-				<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html_x( 'Name (Singular Form)', 'singular name', 'taxo' ); ?></label>
+				<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html_x( 'Name (Singular Form)', 'singular name', 'wpinc_taxo' ); ?></label>
 			</th>
 			<td>
 				<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" size="40" value="<?php echo esc_attr( $val ); ?>">

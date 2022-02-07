@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-16
+ * @version 2022-02-07
  */
 
 namespace wpinc\taxo;
@@ -25,7 +25,7 @@ function add_term_content_field( string $taxonomy, string $key, string $label_po
 			?>
 			<tr class="form-field">
 				<th scope="row">
-					<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html_x( 'Content', 'term content', 'taxo' ); ?><?php echo esc_html( $label_postfix ); ?></label>
+					<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html_x( 'Content', 'term content', 'wpinc_taxo' ); ?><?php echo esc_html( $label_postfix ); ?></label>
 				</th>
 				<td><?php wp_editor( $cont, $key, array( 'textarea_rows' => '8' ) ); ?></td>
 			</tr>
