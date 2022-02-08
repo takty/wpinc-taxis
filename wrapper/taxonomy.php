@@ -4,7 +4,7 @@
  *
  * @package Sample
  * @author Takuto Yanagida
- * @version 2022-02-07
+ * @version 2022-02-09
  */
 
 namespace sample {
@@ -103,11 +103,6 @@ namespace sample {
 	function set_taxonomy_exclusive( $taxonomy_s ): void {
 		\wpinc\taxo\set_taxonomy_exclusive( $taxonomy_s );
 	}
-
-
-	// -----------------------------------------------------------------------------
-
-
 
 
 	// -----------------------------------------------------------------------------
@@ -344,7 +339,7 @@ namespace sample\ordered_term {
 	 *
 	 * @param string|string[] $taxonomy_s A taxonomy slug or an array of taxonomy slugs.
 	 */
-	function add_ordered_term_taxonomy( $taxonomy_s ): void {
+	function add_taxonomy( $taxonomy_s ): void {
 		\wpinc\taxo\ordered_term\add_taxonomy( $taxonomy_s );
 	}
 
@@ -357,7 +352,7 @@ namespace sample\ordered_term {
 	 *     @type string 'order_key' Key of term metadata for order. Default '_menu_order'.
 	 * }
 	 */
-	function activate_ordered_term( array $args = array() ): void {
+	function activate( array $args = array() ): void {
 		\wpinc\taxo\ordered_term\activate( $args );
 	}
 
@@ -367,7 +362,7 @@ namespace sample\ordered_term {
 	 * @param int|\WP_Term $term_id_obj Term object or term ID.
 	 * @return int Order.
 	 */
-	function get_ordered_term_order( $term_id_obj ): int {
+	function get_order( $term_id_obj ): int {
 		return \wpinc\taxo\ordered_term\get_order( $term_id_obj );
 	}
 
@@ -377,7 +372,7 @@ namespace sample\ordered_term {
 	 * @param int[]|\WP_Term[] $terms_id_obj Array of WP_Terms or term_ids.
 	 * @param string           $taxonomy     Taxonomy slug.
 	 */
-	function sort_ordered_terms( array $terms_id_obj, string $taxonomy ): array {
+	function sort_terms( array $terms_id_obj, string $taxonomy ): array {
 		return \wpinc\taxo\ordered_term\sort_terms( $terms_id_obj, $taxonomy );
 	}
 

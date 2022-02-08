@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-26
+ * @version 2022-02-08
  */
 
 namespace wpinc\taxo;
@@ -16,6 +16,9 @@ namespace wpinc\taxo;
  * @param array $post_types (Optional) Post types.
  */
 function simplify_taxonomy_metabox( array $taxonomies = array(), array $post_types = array() ): void {
+	if ( ! is_admin() ) {
+		return;
+	}
 	add_action(
 		'admin_head',
 		function () use ( $taxonomies, $post_types ) {
@@ -60,6 +63,9 @@ function _cb_admin_head__simplify_taxonomy_metabox( array $taxonomies, array $po
  * Disables sorting in taxonomy metaboxes.
  */
 function disable_taxonomy_metabox_sorting(): void {
+	if ( ! is_admin() ) {
+		return;
+	}
 	add_filter(
 		'wp_terms_checklist_args',
 		function ( $args ) {
@@ -79,6 +85,9 @@ function disable_taxonomy_metabox_sorting(): void {
  * @param string|string[] $taxonomy_s A taxonomy slug or an array of taxonomy slugs.
  */
 function remove_term_description( $taxonomy_s ): void {
+	if ( ! is_admin() ) {
+		return;
+	}
 	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 	add_action(
 		'admin_head',
