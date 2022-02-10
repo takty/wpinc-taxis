@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-25
+ * @version 2022-02-10
  */
 
 namespace wpinc\taxo;
@@ -144,7 +144,7 @@ function _cb_admin_print_footer_scripts__set_taxonomy_exclusive( array $txs ): v
 		});
 
 		// For bulk edit
-		$('#doaction, #doaction2').click(function (e) {
+		$('#doaction, #doaction2').on('click', function(e) {
 			const n = $(this).attr('id').substr(2);
 			if ('edit' === $(`select[name="${n}"]`).val()) {
 				e.preventDefault();
