@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-10
+ * @version 2022-02-11
  */
 
 namespace wpinc\taxo;
@@ -174,16 +174,43 @@ function _cb_admin_print_footer_scripts__set_taxonomy_exclusive( array $txs ): v
  */
 function _cb_set_object_terms__set_taxonomy_exclusive( int $object_id, array $terms, array $tt_ids, string $taxonomy, bool $append, array $old_tt_ids, array $txs ): void {
 	if ( in_array( $taxonomy, $txs, true ) ) {
-		$tt_ids = array_map( 'intval', $tt_ids );
+		$old_tt_ids = array_map( 'intval', $old_tt_ids );
+		$tt_ids     = array_map( 'intval', $tt_ids );
 
-		$ai = array_intersect( $old_tt_ids, $tt_ids );
-		$ad = array_diff( $tt_ids, $ai );
+		$ai = array_values( array_intersect( $old_tt_ids, $tt_ids ) );
+		if ( count( $ai ) === count( $tt_ids ) ) {
+			return;  // No change happens.
+		}
+		$ad = array_values( array_diff( $tt_ids, $ai ) );
 		if ( 1 < count( $ad ) ) {
+			$ad = _sort_term_taxonomy_ids( $ad, $taxonomy );
 			array_shift( $ad );
 			$ai = array_merge( $ai, $ad );
 		}
 		if ( ! empty( $ai ) ) {
-			wp_remove_object_terms( $object_id, $ai, $taxonomy );
+			wp_remove_object_terms( $object_id, array_values( $ai ), $taxonomy );
 		}
 	}
+}
+
+/**
+ * Sorts term taxonomy ids when ordered term is activated.
+ *
+ * @param int[]  $tt_ids   Array of term_taxonomy_ids.
+ * @param string $taxonomy Taxonomy slug.
+ * @return array Sorted term_taxonomy_ids.
+ */
+function _sort_term_taxonomy_ids( array $tt_ids, string $taxonomy ): array {
+	if ( function_exists( '\wpinc\taxo\ordered_term\sort_terms' ) ) {
+		$ts = array_map(
+			function ( $tt_id ) {
+				return get_term_by( 'term_taxonomy_id', $tt_id );
+			},
+			$tt_ids
+		);
+		$ts = \wpinc\taxo\ordered_term\sort_terms( $ts, $taxonomy );
+
+		$tt_ids = array_column( $ts, 'term_taxonomy_id' );
+	}
+	return $tt_ids;
 }

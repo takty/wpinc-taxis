@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-07
+ * @version 2022-02-11
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -291,6 +291,7 @@ function _cb_get_the_terms( $terms, int $post_id, string $taxonomy ) {
  *
  * @param int[]|\WP_Term[] $terms_id_obj Array of WP_Terms or term_ids.
  * @param string           $taxonomy     Taxonomy slug.
+ * @return array Sorted terms.
  */
 function sort_terms( array $terms_id_obj, string $taxonomy ): array {
 	$inst = _get_instance();
@@ -309,12 +310,7 @@ function sort_terms( array $terms_id_obj, string $taxonomy ): array {
 			return $a[0] <=> $b[0];
 		}
 	);
-	return array_map(
-		function ( $t ) {
-			return $t[1];
-		},
-		$tos
-	);
+	return array_column( $tos, 1 );
 }
 
 
