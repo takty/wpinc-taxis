@@ -44,9 +44,9 @@ function set_taxonomy_post_type_specific( $taxonomy_s, string $post_type ): void
 function set_taxonomy_default_term( string $taxonomy, string $default_term_slug, $post_type_s = null ): void {
 	if ( $post_type_s ) {
 		$pts = is_array( $post_type_s ) ? $post_type_s : array( $post_type_s );
-		foreach ( $pts as $post_type ) {
+		foreach ( $pts as $pt ) {
 			add_action(
-				"save_post_$post_type",
+				"save_post_$pt",
 				function ( int $post_id ) use ( $taxonomy, $default_term_slug ) {
 					_cb_save_post__set_taxonomy_default_term( $post_id, $taxonomy, $default_term_slug );
 				},
