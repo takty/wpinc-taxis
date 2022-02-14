@@ -4,7 +4,7 @@
  *
  * @package Sample
  * @author Takuto Yanagida
- * @version 2022-02-09
+ * @version 2022-02-14
  */
 
 namespace sample {
@@ -93,15 +93,6 @@ namespace sample {
 	 */
 	function set_taxonomy_default_term( string $taxonomy, string $default_term_slug, $post_type_s = null ): void {
 		\wpinc\taxo\set_taxonomy_default_term( $taxonomy, $default_term_slug, $post_type_s );
-	}
-
-	/**
-	 * Sets taxonomies to be exclusive.
-	 *
-	 * @param string|string[] $taxonomy_s A taxonomy slug or array of taxonomy slugs.
-	 */
-	function set_taxonomy_exclusive( $taxonomy_s ): void {
-		\wpinc\taxo\set_taxonomy_exclusive( $taxonomy_s );
 	}
 
 
@@ -328,6 +319,19 @@ namespace sample {
 	 */
 	function get_term_root( \WP_Term $term, int $count = 1, int $root_id = 0 ): array {
 		return \wpinc\taxo\get_term_root( $term, $count, $root_id );
+	}
+}
+
+namespace sample\exclusive_taxonomy {
+	require_once __DIR__ . '/taxo/exclusive-taxonomy.php';
+
+	/**
+	 * Makes taxonomies exclusive.
+	 *
+	 * @param string|string[] $taxonomy_s A taxonomy slug or array of taxonomy slugs.
+	 */
+	function add_taxonomy( $taxonomy_s ): void {
+		\wpinc\taxo\exclusive_taxonomy\add_taxonomy( $taxonomy_s );
 	}
 }
 
