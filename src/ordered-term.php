@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-11
+ * @version 2022-02-15
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -51,9 +51,9 @@ function activate( array $args = array() ): void {
 			add_action( "{$tx}_edit_form_fields", '\wpinc\taxo\ordered_term\_cb_taxonomy_edit_form_fields' );
 			add_action( "edited_{$tx}", '\wpinc\taxo\ordered_term\_cb_edited_taxonomy', 10, 2 );
 		}
-		add_action( 'admin_head', '\wpinc\taxo\ordered_term\_cb_admin_head' );
 		global $pagenow;
 		if ( 'edit-tags.php' === $pagenow ) {
+			add_action( 'admin_head', '\wpinc\taxo\ordered_term\_cb_admin_head' );
 			add_action( 'quick_edit_custom_box', '\wpinc\taxo\ordered_term\_cb_quick_edit_custom_box', 10, 3 );
 		}
 	}
@@ -179,9 +179,8 @@ function _cb_edited_taxonomy( int $term_id, int $tt_id ): void {
  */
 function _cb_admin_head(): void {
 	$inst = _get_instance();
-	$tx   = $_GET[ 'taxonomy'] ?? null;  // phpcs:ignore
-	global $pagenow;
-	if ( 'edit-tags.php' !== $pagenow || ! in_array( $tx, $inst->txs, true ) ) {
+	global $taxonomy;
+	if ( ! in_array( $taxonomy, $inst->txs, true ) ) {
 		return;
 	}
 	?>

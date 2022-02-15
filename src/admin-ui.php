@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-10
+ * @version 2022-02-15
  */
 
 namespace wpinc\taxo;
@@ -16,21 +16,34 @@ namespace wpinc\taxo;
  * @param string[] $post_types (Optional) Post types.
  */
 function simplify_taxonomy_metabox( array $taxonomies = array(), array $post_types = array() ): void {
-	if ( is_admin() ) {
-		add_action(
-			'admin_head',
-			function () use ( $taxonomies, $post_types ) {
-				_cb_admin_head__simplify_taxonomy_metabox( $taxonomies, $post_types );
-			}
-		);
+	global $pagenow, $post_type;
 
-		// For classic editor.
-		add_action(
-			'admin_init',
-			function () use ( $taxonomies, $post_types ) {
-				_cb_admin_init__simplify_taxonomy_metabox( $taxonomies, $post_types );
-			}
-		);
+	if ( is_admin() ) {
+		// Remove UI elements from metabox for both classic editor and block editor.
+		if (
+			( 'post-new.php' === $pagenow || 'post.php' === $pagenow ) &&
+			( empty( $post_types ) || in_array( $post_type, $post_types, true ) )
+		) {
+			add_action(
+				'admin_head',
+				function () use ( $taxonomies ) {
+					_cb_admin_head__simplify_taxonomy_metabox( $taxonomies );
+				}
+			);
+		}
+
+		// Change term selection UI from textarea to checkboxes for classic editor and list.
+		if (
+			( 'edit.php' === $pagenow || 'post-new.php' === $pagenow || 'post.php' === $pagenow ) &&
+			( empty( $post_types ) || in_array( $post_type, $post_types, true ) )
+		) {
+			add_action(
+				'admin_init',
+				function () use ( $taxonomies ) {
+					_cb_admin_init__simplify_taxonomy_metabox( $taxonomies );
+				}
+			);
+		}
 	}
 	if ( _is_rest() ) {
 		// For block editor.
@@ -51,31 +64,24 @@ function simplify_taxonomy_metabox( array $taxonomies = array(), array $post_typ
  *
  * @access private
  *
- * @param string[] $tx_slugs   Taxonomy slugs.
- * @param string[] $post_types Post types.
+ * @param string[] $tx_slugs Taxonomy slugs.
  */
-function _cb_admin_head__simplify_taxonomy_metabox( array $tx_slugs, array $post_types ): void {
-	global $pagenow, $post_type;
-
-	if ( 'post-new.php' === $pagenow || 'post.php' === $pagenow ) {
-		if ( empty( $post_types ) || in_array( $post_type, $post_types, true ) ) {
-			$s = '';
-			if ( empty( $tx_slugs ) ) {
-				$s .= '.categorydiv div[id$="-adder"], .category-tabs{display:none;}';
-				$s .= '.categorydiv div.tabs-panel{border:none;padding:0;}';
-				$s .= '.categorychecklist{margin-top:4px;}';
-			} else {
-				foreach ( $tx_slugs as $tx ) {
-					$s .= "#$tx-adder,#$tx-tabs{display:none;}";
-					$s .= "#$tx-all{border:none;padding:0;}";
-					$s .= "#{$tx}checklist{margin-top:4px;}";
-				}
-			}
-			// For Gutenberg.
-			$s .= '.editor-post-taxonomies__hierarchical-terms-add{display:none;}';
-			echo wp_kses( '<style>' . $s . '</style>', array( 'style' => array() ) );
+function _cb_admin_head__simplify_taxonomy_metabox( array $tx_slugs ): void {
+	$s = '';
+	if ( empty( $tx_slugs ) ) {
+		$s .= '.categorydiv div[id$="-adder"], .category-tabs{display:none;}';
+		$s .= '.categorydiv div.tabs-panel{border:none;padding:0;}';
+		$s .= '.categorychecklist{margin-top:4px;}';
+	} else {
+		foreach ( $tx_slugs as $tx ) {
+			$s .= "#$tx-adder,#$tx-tabs{display:none;}";
+			$s .= "#$tx-all{border:none;padding:0;}";
+			$s .= "#{$tx}checklist{margin-top:4px;}";
 		}
 	}
+	// For block editor.
+	$s .= '.editor-post-taxonomies__hierarchical-terms-add{display:none;}';
+	echo wp_kses( '<style>' . $s . '</style>', array( 'style' => array() ) );
 }
 
 /**
@@ -83,18 +89,13 @@ function _cb_admin_head__simplify_taxonomy_metabox( array $tx_slugs, array $post
  *
  * @access private
  *
- * @param string[] $tx_slugs   Taxonomy slugs.
- * @param string[] $post_types Post types.
+ * @param string[] $tx_slugs Taxonomy slugs.
  */
-function _cb_admin_init__simplify_taxonomy_metabox( array $tx_slugs, array $post_types ): void {
-	global $pagenow, $post_type;
-
-	if ( 'edit-tags.php' !== $pagenow && ( empty( $post_types ) || in_array( $post_type, $post_types, true ) ) ) {
-		$tx_objs = _taxonomy_slugs_to_objects( $tx_slugs );
-		foreach ( $tx_objs as &$obj ) {
-			$obj->hierarchical = true;
-			$obj->meta_box_cb  = 'post_categories_meta_box';
-		}
+function _cb_admin_init__simplify_taxonomy_metabox( array $tx_slugs ): void {
+	$tx_objs = _taxonomy_slugs_to_objects( $tx_slugs );
+	foreach ( $tx_objs as &$obj ) {
+		$obj->hierarchical = true;
+		$obj->meta_box_cb  = 'post_categories_meta_box';
 	}
 }
 
@@ -137,10 +138,11 @@ function _is_rest() {
 
 
 /**
- * Disables sorting in taxonomy metaboxes.
+ * Disables sorting in taxonomy metaboxes for classic editor.
  */
 function disable_taxonomy_metabox_sorting(): void {
-	if ( ! is_admin() ) {
+	global $pagenow;
+	if ( ! is_admin() || ( 'post-new.php' !== $pagenow && 'post.php' !== $pagenow ) ) {
 		return;
 	}
 	add_filter(
@@ -162,26 +164,26 @@ function disable_taxonomy_metabox_sorting(): void {
  * @param string|string[] $taxonomy_s A taxonomy slug or an array of taxonomy slugs.
  */
 function remove_term_description( $taxonomy_s ): void {
+	global $pagenow;
 	if ( ! is_admin() ) {
 		return;
 	}
 	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
-	add_action(
-		'admin_head',
-		function () use ( $txs ) {
-			global $current_screen;
-			if ( strpos( $current_screen->id, 'edit-' ) !== 0 ) {
-				return;
-			}
-			$id_tax = substr( $current_screen->id, 5 );
-			if ( in_array( $id_tax, $txs, true ) ) {
-				?>
-				<script>jQuery(function($){$('.term-description-wrap').remove();});</script>
-				<?php
-			}
-		},
-		99
-	);
+	if ( 'edit-tags.php' === $pagenow || 'term.php' === $pagenow ) {
+		add_action(
+			'admin_head',
+			function () use ( $txs ) {
+				global $taxonomy;
+				if ( in_array( $taxonomy, $txs, true ) ) {
+					?>
+					<script>jQuery(function ($) { $('.term-description-wrap').remove(); });</script>
+					<?php
+				}
+			},
+			99
+		);
+	}
+	// The below is called when both $pagenow is 'edit-tags.php' and AJAX call.
 	foreach ( $txs as $tx ) {
 		add_filter(
 			"manage_edit-{$tx}_columns",

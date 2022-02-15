@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-14
+ * @version 2022-02-15
  */
 
 namespace wpinc\taxo\exclusive_taxonomy;
@@ -31,7 +31,10 @@ function add_taxonomy( $taxonomy_s ): void {
  * Initializes hooks.
  */
 function _initialize_hooks(): void {
-	add_action( 'admin_print_footer_scripts', '\wpinc\taxo\exclusive_taxonomy\_cb_admin_print_footer_scripts' );
+	global $pagenow;
+	if ( 'edit.php' === $pagenow || 'post-new.php' === $pagenow || 'post.php' === $pagenow ) {
+		add_action( 'admin_print_footer_scripts', '\wpinc\taxo\exclusive_taxonomy\_cb_admin_print_footer_scripts' );
+	}
 	add_action( 'set_object_terms', '\wpinc\taxo\exclusive_taxonomy\_cb_set_object_terms', 10, 6 );
 
 	// For block editor.
@@ -223,7 +226,7 @@ function _cb_output_html( \WP_Post $post, string $tx ): void {
 
 	$curs = get_the_terms( $post, $tx );
 	if ( ! is_array( $curs ) ) {
-		return;
+		$curs = array();
 	}
 	$curs = array_column( $curs, 'term_id' );
 
