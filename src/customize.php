@@ -4,10 +4,75 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-14
+ * @version 2022-02-22
  */
 
 namespace wpinc\taxo;
+
+/**
+ * Disables sorting in taxonomy metaboxes for classic editor.
+ */
+function disable_taxonomy_metabox_sorting(): void {
+	global $pagenow;
+	if ( ! is_admin() || ( 'post-new.php' !== $pagenow && 'post.php' !== $pagenow ) ) {
+		return;
+	}
+	add_filter(
+		'wp_terms_checklist_args',
+		function ( $args ) {
+			$args['checked_ontop'] = false;
+			return $args;
+		}
+	);
+}
+
+/**
+ * Removes term description form from admin.
+ *
+ * @param string|string[] $taxonomy_s A taxonomy slug or an array of taxonomy slugs.
+ */
+function remove_term_description( $taxonomy_s ): void {
+	global $pagenow;
+	if ( ! is_admin() ) {
+		return;
+	}
+	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
+	if ( 'edit-tags.php' === $pagenow || 'term.php' === $pagenow ) {
+		add_action(
+			'admin_head',
+			function () use ( $txs ) {
+				global $taxonomy;
+				if ( in_array( $taxonomy, $txs, true ) ) {
+					?>
+					<script>jQuery(function ($) { $('.term-description-wrap').remove(); });</script>
+					<?php
+				}
+			},
+			99
+		);
+	}
+	// The below is called when both $pagenow is 'edit-tags.php' and AJAX call.
+	foreach ( $txs as $tx ) {
+		add_filter(
+			"manage_edit-{$tx}_columns",
+			function ( $columns ) {
+				unset( $columns['description'] );
+				return $columns;
+			}
+		);
+		add_filter(
+			"manage_edit-{$tx}_sortable_columns",
+			function ( $sortable ) {
+				unset( $sortable['description'] );
+				return $sortable;
+			}
+		);
+	}
+}
+
+
+// -----------------------------------------------------------------------------
+
 
 /**
  * Sets taxonomies to be specific to the post type.
