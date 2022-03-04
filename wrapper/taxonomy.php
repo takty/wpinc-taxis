@@ -4,7 +4,7 @@
  *
  * @package Sample
  * @author Takuto Yanagida
- * @version 2022-02-22
+ * @version 2022-03-04
  */
 
 namespace sample {
@@ -398,6 +398,6 @@ namespace sample\simple_ui {
 	 * @param string|string[] $taxonomy_s  (Optional) A taxonomy slug or array of taxonomy slugs.
 	 */
 	function activate( $taxonomy_s = array() ): void {
-		\wpinc\taxo\simple_ui\activate( $taxonomy_s, $post_type_s );
+		\wpinc\taxo\simple_ui\activate( $taxonomy_s );
 	}
 }
