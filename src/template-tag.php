@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-25
+ * @version 2022-05-23
  */
 
 namespace wpinc\taxo;
@@ -247,7 +247,7 @@ function make_term_list( array $args = array() ): array {
 		$name = $args['filter']( get_term_name( $t, $args['singular'] ) );
 		if ( $args['do_add_link'] ) {
 			$url = get_term_link( $t );
-			if ( ! is_wp_error( $link ) ) {
+			if ( ! is_wp_error( $url ) ) {
 				$links[] = '<a href="' . esc_url( $url ) . "\" rel=\"tag\" $cls>$name</a>";
 			}
 		} else {
