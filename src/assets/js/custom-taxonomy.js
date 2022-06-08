@@ -3,7 +3,7 @@
  * Based on https://wordpress.org/plugins/radio-buttons-for-taxonomies/
  *
  * @author Takuto Yanagida
- * @version 2022-02-22
+ * @version 2022-06-08
  */
 
 ((wp) => {
@@ -147,7 +147,7 @@
 			const taxonomy = select('core').getTaxonomy( slug );
 			if (!taxonomy) return { hasAssignAction: false, terms: [], taxonomy, isExclusive: false };
 
-			const wct_ex      = wpinc_custom_taxonomy_exclusive;
+			const wct_ex      = typeof wpinc_custom_taxonomy_exclusive === 'undefined' ? null : wpinc_custom_taxonomy_exclusive;
 			const isExclusive = (wct_ex && ('*' === wct_ex || wct_ex.includes(slug)));
 
 			const { getCurrentPost, getEditedPostAttribute } = select('core/editor');
@@ -191,8 +191,8 @@
 
 
 	function Filter(OrigComp) {
-		const wct_in = wpinc_custom_taxonomy_inclusive;
-		const wct_ex = wpinc_custom_taxonomy_exclusive;
+		const wct_in = typeof wpinc_custom_taxonomy_inclusive === 'undefined' ? null : wpinc_custom_taxonomy_inclusive;
+		const wct_ex = typeof wpinc_custom_taxonomy_exclusive === 'undefined' ? null : wpinc_custom_taxonomy_exclusive;
 
 		return function (props) {
 			const tx = props.slug;
