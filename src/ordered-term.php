@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-15
+ * @version 2022-06-19
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -251,11 +251,13 @@ function _cb_quick_edit_custom_box( string $column_name, string $post_type, stri
  */
 function _cb_terms_clauses( array $pieces, array $txs, array $args ): array {
 	$inst = _get_instance();
-	if ( count( $txs ) === 0 || count( $txs ) > 1 ) {
+	if ( count( $txs ) === 0 ) {
 		return $pieces;
 	}
-	if ( count( $txs ) === 1 || ! in_array( $txs[0], $inst->txs, true ) ) {
-		return $pieces;
+	foreach ( $txs as $tx ) {
+		if ( ! in_array( $tx, $inst->txs, true ) ) {
+			return $pieces;
+		}
 	}
 	$orderby = $args['orderby'] ?? '';
 	$order   = $args['order'] ?? 'ASC';
