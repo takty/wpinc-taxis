@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-22
+ * @version 2022-06-20
  */
 
 namespace wpinc\taxo\simple_ui;
@@ -15,18 +15,45 @@ namespace wpinc\taxo\simple_ui;
  * @param string|string[] $taxonomy_s  (Optional) A taxonomy slug or array of taxonomy slugs.
  */
 function activate( $taxonomy_s = array() ): void {
-	if ( ! is_admin() ) {
-		return;
-	}
 	$inst = _get_instance();
 	$txs  = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 
 	static $activated = false;
 	if ( ! $activated ) {
 		$activated = true;
-		_initialize_hooks();
+		if ( is_admin() ) {
+			_initialize_hooks();
+		}
+		_initialize_rest_hooks();
 	}
 	array_push( $inst->txs, ...$txs );
+}
+
+/**
+ * Initializes hooks for REST.
+ */
+function _initialize_rest_hooks(): void {
+	add_filter( 'rest_prepare_taxonomy', '\wpinc\taxo\simple_ui\_cb_rest_prepare_taxonomy', 10, 3 );
+}
+
+/**
+ * Callback function for 'rest_prepare_taxonomy' hook.
+ *
+ * @param \WP_REST_Response $response The response object.
+ * @param \WP_Taxonomy      $item     The original taxonomy object.
+ * @param \WP_REST_Request  $request  Request used to generate the response.
+ * @return \WP_REST_Response Response object.
+ */
+function _cb_rest_prepare_taxonomy( \WP_REST_Response $response, \WP_Taxonomy $item, \WP_REST_Request $request ): \WP_REST_Response {
+	$ctx = empty( $request['context'] ) ? 'view' : $request['context'];
+
+	if ( 'edit' === $ctx && false === $item->meta_box_cb ) {
+		$data = $response->get_data();
+
+		$data['visibility']['show_ui'] = false;
+		$response->set_data( $data );
+	}
+	return $response;
 }
 
 /**
@@ -52,8 +79,10 @@ function _cb_admin_init(): void {
 
 	$tx_objs = _taxonomy_slugs_to_objects( $inst->txs );
 	foreach ( $tx_objs as &$obj ) {
-		$obj->hierarchical = true;
-		$obj->meta_box_cb  = 'post_categories_meta_box';
+		if ( false !== $obj->meta_box_cb ) {
+			$obj->hierarchical = true;
+			$obj->meta_box_cb  = 'post_categories_meta_box';
+		}
 	}
 }
 
@@ -120,9 +149,41 @@ function _cb_enqueue_block_editor_assets(): void {
 		filemtime( __DIR__ . '/assets/js/custom-taxonomy.min.js' ),
 		true
 	);
-	$val  = empty( $inst->txs ) ? "'*'" : wp_json_encode( $inst->txs );
+	$val  = _get_target_taxonomy_slugs_json( $inst->txs );
 	$data = "var wpinc_custom_taxonomy_inclusive = $val;";
 	wp_add_inline_script( 'wpinc-custom-taxonomy', $data, 'before' );
+}
+
+/**
+ * Makes JSON string of target taxonomies.
+ *
+ * @param string[] $tx_slugs Taxonomy slugs.
+ * @return string JSON string.
+ */
+function _get_target_taxonomy_slugs_json( array $tx_slugs ): string {
+	global $wp_taxonomies;
+	$objs = array();
+
+	if ( empty( $tx_slugs ) ) {
+		$objs = $wp_taxonomies;
+	} else {
+		foreach ( $tx_slugs as $slug ) {
+			$obj = get_taxonomy( $slug );
+			if ( $obj ) {
+				$objs[] = $obj;
+			}
+		}
+	}
+	$ret = array();
+	foreach ( $objs as $obj ) {
+		if ( false !== $obj->meta_box_cb ) {
+			$ret[] = $obj->name;
+		}
+	}
+	if ( count( $wp_taxonomies ) === count( $ret ) ) {
+		return "'*'";
+	}
+	return wp_json_encode( $ret );
 }
 
 
