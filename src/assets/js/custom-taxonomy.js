@@ -3,7 +3,7 @@
  * Based on https://wordpress.org/plugins/radio-buttons-for-taxonomies/
  *
  * @author Takuto Yanagida
- * @version 2022-06-08
+ * @version 2022-07-01
  */
 
 ((wp) => {
@@ -152,7 +152,7 @@
 
 			const { getCurrentPost, getEditedPostAttribute } = select('core/editor');
 			return {
-				hasAssignAction: _.get(getCurrentPost(), ['_links', `wp:action-assign-${taxonomy.rest_base}`], false),
+				hasAssignAction: _get(getCurrentPost(), ['_links', `wp:action-assign-${taxonomy.rest_base}`], false),
 				terms          : getEditedPostAttribute(taxonomy.rest_base),
 				taxonomy,
 				isExclusive,
@@ -211,4 +211,27 @@
 		'custom-taxonomy',
 		Filter
 	);
+
+
+	// For WP 5.7 (From underscore.js v1.13.4) ---------------------------------
+
+
+	function _get(object, path, defaultValue) {
+		var value = __deepGet(object, __toPath(path));
+		return _.isUndefined(value) ? defaultValue : value;
+	}
+
+	function __toPath(path) {
+		return Array.isArray(path) ? path : [path];
+	}
+
+	function __deepGet(obj, path) {
+		var length = path.length;
+		for (var i = 0; i < length; i++) {
+			if (obj == null) return void 0;
+			obj = obj[path[i]];
+		}
+		return length ? obj : void 0;
+	}
+
 })(window.wp);
