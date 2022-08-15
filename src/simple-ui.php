@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-06-20
+ * @version 2022-08-15
  */
 
 namespace wpinc\taxo\simple_ui;
@@ -62,7 +62,7 @@ function _cb_rest_prepare_taxonomy( \WP_REST_Response $response, \WP_Taxonomy $i
 function _initialize_hooks(): void {
 	global $pagenow;
 
-	if ( 'edit.php' === $pagenow || 'post-new.php' === $pagenow || 'post.php' === $pagenow ) {
+	if ( wp_doing_ajax() || 'edit.php' === $pagenow || 'post-new.php' === $pagenow || 'post.php' === $pagenow ) {
 		// Change term selection UI from textarea to checkboxes for classic editor and list.
 		add_action( 'admin_init', '\wpinc\taxo\simple_ui\_cb_admin_init' );
 	}
