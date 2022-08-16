@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-06-19
+ * @version 2022-08-16
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -19,6 +19,12 @@ function add_taxonomy( $taxonomy_s ): void {
 	$inst = _get_instance();
 
 	$inst->txs = array_merge( $inst->txs, $txs );
+
+	if ( $inst->is_activated && is_admin() ) {
+		foreach ( $txs as $tx ) {
+			_add_hook_for_specific_taxonomy( $tx );
+		}
+	}
 }
 
 /**
@@ -31,25 +37,19 @@ function add_taxonomy( $taxonomy_s ): void {
  * }
  */
 function activate( array $args = array() ): void {
-	static $activated = 0;
-	if ( $activated++ ) {
+	$inst = _get_instance();
+	if ( $inst->is_activated ) {
 		return;
 	}
-	$inst = _get_instance();
+	$inst->is_activated = true;
 
-	$args += array(
-		'order_key' => '_menu_order',
-	);
+	$args += array( 'order_key' => '_menu_order' );
 
 	$inst->key_order = $args['order_key'];
 
 	if ( is_admin() ) {
 		foreach ( $inst->txs as $tx ) {
-			add_filter( "manage_edit-{$tx}_columns", '\wpinc\taxo\ordered_term\_cb_manage_edit_taxonomy_columns' );
-			add_filter( "manage_edit-{$tx}_sortable_columns", '\wpinc\taxo\ordered_term\_cb_manage_edit_taxonomy_sortable_columns' );
-			add_action( "manage_{$tx}_custom_column", '\wpinc\taxo\ordered_term\_cb_manage_taxonomy_custom_column', 10, 3 );
-			add_action( "{$tx}_edit_form_fields", '\wpinc\taxo\ordered_term\_cb_taxonomy_edit_form_fields' );
-			add_action( "edited_{$tx}", '\wpinc\taxo\ordered_term\_cb_edited_taxonomy', 10, 2 );
+			_add_hook_for_specific_taxonomy( $tx );
 		}
 		global $pagenow;
 		if ( 'edit-tags.php' === $pagenow ) {
@@ -59,6 +59,21 @@ function activate( array $args = array() ): void {
 	}
 	add_filter( 'terms_clauses', '\wpinc\taxo\ordered_term\_cb_terms_clauses', 10, 3 );
 	add_filter( 'get_the_terms', '\wpinc\taxo\ordered_term\_cb_get_the_terms', 10, 3 );
+}
+
+/**
+ * Add hooks for the specific taxonomy.
+ *
+ * @access private
+ *
+ * @param string $tx A taxonomy slug.
+ */
+function _add_hook_for_specific_taxonomy( string $tx ): void {
+	add_filter( "manage_edit-{$tx}_columns", '\wpinc\taxo\ordered_term\_cb_manage_edit_taxonomy_columns' );
+	add_filter( "manage_edit-{$tx}_sortable_columns", '\wpinc\taxo\ordered_term\_cb_manage_edit_taxonomy_sortable_columns' );
+	add_action( "manage_{$tx}_custom_column", '\wpinc\taxo\ordered_term\_cb_manage_taxonomy_custom_column', 10, 3 );
+	add_action( "{$tx}_edit_form_fields", '\wpinc\taxo\ordered_term\_cb_taxonomy_edit_form_fields' );
+	add_action( "edited_{$tx}", '\wpinc\taxo\ordered_term\_cb_edited_taxonomy', 10, 2 );
 }
 
 /**
@@ -444,11 +459,11 @@ function _get_instance(): object {
 		public $txs = array();
 
 		/**
-		 * Whether filter is added.
+		 * Whether hooks are activated.
 		 *
 		 * @var bool
 		 */
-		public $is_filtered = false;
+		public $is_activated = false;
 
 
 		// ---------------------------------------------------------------------
