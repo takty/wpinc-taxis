@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-06-02
+ * @version 2022-11-18
  */
 
 namespace wpinc\taxo;
@@ -58,7 +58,7 @@ function add_terms( array $args ): void {
  * @param int   $depth         Depth of order. Default 0.
  */
 function _add_terms( array $args, array $slug_to_label, int $parent_id = 0, int $parent_idx = 0, int $depth = 0 ): void {
-	$cur_order = ( $args['orders'] ) ? array( 1, 1 ) : $args['orders'][ $depth ];
+	$cur_order = is_array( $args['orders'] ) ? $args['orders'][ $depth ] : array( 1, 1 );
 
 	list( $order_bgn, $order_inc ) = $cur_order;
 

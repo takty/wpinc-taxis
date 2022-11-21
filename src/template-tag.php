@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-05-23
+ * @version 2022-11-18
  */
 
 namespace wpinc\taxo;
@@ -156,7 +156,7 @@ function get_the_term_list( $post_id_obj, string $taxonomy, array $args ): strin
 		'do_insert_root' => false,
 	);
 	if ( $args['do_insert_root'] ) {
-		$ts = _insert_root( $ts );
+		$args['terms'] = _insert_root( $ts );
 	}
 	$tags = make_term_list( $args );
 	return $args['before'] . join( $args['separator'], $tags ) . $args['after'];
