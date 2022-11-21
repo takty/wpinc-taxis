@@ -4,10 +4,57 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-16
+ * @version 2022-11-21
  */
 
 namespace wpinc\taxo;
+
+/**
+ * Adds term ancestors as class names to post class.
+ */
+function add_term_ancestors_to_post_class() {
+	add_filter(
+		'post_class',
+		function ( array $classes, array $class, int $post_id ) {
+			$txs = get_taxonomies( array( 'public' => true ) );
+			$txs = apply_filters( 'post_class_taxonomies', $txs, $post_id, $classes, $class );
+
+			$cs = array();
+			foreach ( (array) $txs as $tx ) {
+				if ( is_object_in_taxonomy( get_post_type( $post_id ), $tx ) ) {
+					$as = array();
+					foreach ( (array) get_the_terms( $post_id, $tx ) as $t ) {
+						$as += get_ancestors( $t->term_id, $tx );
+					}
+					foreach ( $as as $a ) {
+						$t = get_term( $a );
+						if ( empty( $t->slug ) ) {
+							continue;
+						}
+
+						$term_class = sanitize_html_class( $t->slug, $t->term_id );
+						if ( is_numeric( $term_class ) || ! trim( $term_class, '-' ) ) {
+							$term_class = $t->term_id;
+						}
+
+						if ( 'post_tag' === $tx ) {
+							$cs[] = 'tag-' . $term_class;
+						} else {
+							$cs[] = sanitize_html_class( $tx . '-' . $term_class, $tx . '-' . $t->term_id );
+						}
+					}
+				}
+			}
+			return $classes + array_map( 'esc_attr', $cs );
+		},
+		10,
+		3
+	);
+}
+
+
+// -----------------------------------------------------------------------------
+
 
 /**
  * Enables 'taxonomy' and 'term' arguments of wp_get_archives.

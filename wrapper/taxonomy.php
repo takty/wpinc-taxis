@@ -4,7 +4,7 @@
  *
  * @package Sample
  * @author Takuto Yanagida
- * @version 2022-03-04
+ * @version 2022-11-21
  */
 
 namespace sample {
@@ -87,6 +87,13 @@ namespace sample {
 
 	// -------------------------------------------------------------------------
 
+
+	/**
+	 * Adds term ancestors as class names to post class.
+	 */
+	function add_term_ancestors_to_post_class() {
+		\wpinc\taxo\add_term_ancestors_to_post_class();
+	}
 
 	/**
 	 * Enables 'taxonomy' and 'term' arguments of wp_get_archives.
