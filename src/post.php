@@ -45,7 +45,7 @@ function add_term_ancestors_to_post_class() {
 					}
 				}
 			}
-			return $classes + array_map( 'esc_attr', $cs );
+			return array_merge( $classes, array_map( 'esc_attr', $cs ) );
 		},
 		10,
 		3
