@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-11-21
+ * @version 2022-12-06
  */
 
 namespace wpinc\taxo;
@@ -23,8 +23,11 @@ function add_term_ancestors_to_post_class() {
 			foreach ( (array) $txs as $tx ) {
 				if ( is_object_in_taxonomy( get_post_type( $post_id ), $tx ) ) {
 					$as = array();
-					foreach ( (array) get_the_terms( $post_id, $tx ) as $t ) {
-						$as += get_ancestors( $t->term_id, $tx );
+					$ts = get_the_terms( $post_id, $tx );
+					if ( is_array( $ts ) ) {
+						foreach ( $ts as $t ) {
+							$as += get_ancestors( $t->term_id, $tx );
+						}
 					}
 					foreach ( $as as $a ) {
 						$t = get_term( $a );
