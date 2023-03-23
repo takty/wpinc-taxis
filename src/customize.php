@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-22
+ * @version 2023-03-23
  */
 
 namespace wpinc\taxo;
@@ -121,7 +121,7 @@ function set_taxonomy_default_term( string $taxonomy, string $default_term_slug,
 				function ( int $post_id ) use ( $taxonomy, $default_term_slug ) {
 					_cb_save_post__set_taxonomy_default_term( $post_id, $taxonomy, $default_term_slug );
 				},
-				10,
+				10
 			);
 		}
 	} else {
@@ -130,7 +130,7 @@ function set_taxonomy_default_term( string $taxonomy, string $default_term_slug,
 			function ( int $post_id ) use ( $taxonomy, $default_term_slug ) {
 				_cb_save_post__set_taxonomy_default_term( $post_id, $taxonomy, $default_term_slug );
 			},
-			10,
+			10
 		);
 	}
 }
