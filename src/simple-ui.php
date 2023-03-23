@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-08-15
+ * @version 2023-03-23
  */
 
 namespace wpinc\taxo\simple_ui;
@@ -16,7 +16,6 @@ namespace wpinc\taxo\simple_ui;
  */
 function activate( $taxonomy_s = array() ): void {
 	$inst = _get_instance();
-	$txs  = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 
 	static $activated = false;
 	if ( ! $activated ) {
@@ -26,7 +25,11 @@ function activate( $taxonomy_s = array() ): void {
 		}
 		_initialize_rest_hooks();
 	}
-	array_push( $inst->txs, ...$txs );
+
+	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
+	if ( ! empty( $txs ) ) {
+		array_push( $inst->txs, ...$txs );
+	}
 }
 
 /**
