@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-07
+ * @version 2023-06-03
  */
 
 namespace wpinc\taxo;
@@ -12,20 +12,20 @@ namespace wpinc\taxo;
 /**
  * Adds term content field.
  *
- * @param string $taxonomy      Taxonomy.
- * @param string $key           Term meta key.
- * @param string $label_postfix The postfix shown after label 'Content'. Default empty.
- * @param int    $priority      Priority of action '{$taxonomy}_edit_form_fields'. Default 10.
+ * @param string $taxonomy     Taxonomy.
+ * @param string $key          Term meta key.
+ * @param string $label_suffix The suffix shown after label 'Content'. Default empty.
+ * @param int    $priority     Priority of action '{$taxonomy}_edit_form_fields'. Default 10.
  */
-function add_term_content_field( string $taxonomy, string $key, string $label_postfix = '', int $priority = 10 ): void {
+function add_term_content_field( string $taxonomy, string $key, string $label_suffix = '', int $priority = 10 ): void {
 	add_action(
 		"{$taxonomy}_edit_form_fields",
-		function ( $term ) use ( $key, $label_postfix ) {
+		function ( $term ) use ( $key, $label_suffix ) {
 			$cont = get_term_meta( $term->term_id, $key, true );
 			?>
 			<tr class="form-field">
 				<th scope="row">
-					<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html_x( 'Content', 'term content', 'wpinc_taxo' ); ?><?php echo esc_html( $label_postfix ); ?></label>
+					<label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html_x( 'Content', 'term content', 'wpinc_taxo' ); ?><?php echo esc_html( $label_suffix ); ?></label>
 				</th>
 				<td><?php wp_editor( $cont, $key, array( 'textarea_rows' => '8' ) ); ?></td>
 			</tr>
