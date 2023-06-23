@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-11-18
+ * @version 2023-06-22
  */
 
 namespace wpinc\taxo;
@@ -113,7 +113,7 @@ function _add_term_one( array $args, string $slug, string $label, int $parent_id
 		if ( $args['order_key'] ) {
 			update_term_meta( $ret['term_id'], $args['order_key'], $idx );
 		}
-		if ( $meta && 0 < count( $meta_vals ) ) {
+		if ( is_array( $meta_vals ) && 0 < count( $meta_vals ) ) {
 			$count = min( count( $meta_keys ), count( $meta_vals ) );
 			for ( $i = 0; $i < $count; ++$i ) {
 				update_term_meta( $ret['term_id'], $meta_keys[ $i ], $meta_vals[ $i ] );
