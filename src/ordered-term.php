@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-08-16
+ * @version 2023-06-22
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -404,7 +404,7 @@ function _cb_edited_taxonomy__post_term_order( int $term_id, int $tt_id ): void 
 	);
 	if ( ! empty( $ps ) ) {
 		foreach ( $ps as $p ) {
-			_update_order_post_meta( $p->ID, $taxonomy );
+			_update_order_post_meta( $p->ID, $t->taxonomy );
 		}
 	}
 }

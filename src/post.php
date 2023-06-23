@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-12-06
+ * @version 2023-06-22
  */
 
 namespace wpinc\taxo;
@@ -117,7 +117,7 @@ function limit_adjacent_post_with_multiple_taxonomy( $taxonomy_s, string $post_t
 		add_filter(
 			"get_{$adj}_post_where",
 			function ( $where, $in_same_term, $excluded_terms, $taxonomy, $post ) use ( $txs, $post_type ) {
-				_cb_get_adjacent_post_where( $join, $in_same_term, $excluded_terms, $taxonomy, $post, $txs, $post_type );
+				_cb_get_adjacent_post_where( $where, $in_same_term, $excluded_terms, $taxonomy, $post, $txs, $post_type );
 			},
 			10,
 			5
