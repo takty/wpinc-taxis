@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-01-16
+ * @version 2023-06-22
  */
 
 namespace wpinc\taxo;
@@ -12,12 +12,12 @@ namespace wpinc\taxo;
 /**
  * Creates a taxonomy object.
  *
- * @param array  $args      Arguments.
- * @param string $post_type Post type.
- * @param string $suffix    Suffix of taxonomy slug and rewrite slug.
- * @param string $slug      (Optional) Prefix of rewrite slug. Default is $post_type.
+ * @param array       $args      Arguments.
+ * @param string      $post_type Post type.
+ * @param string      $suffix    Suffix of taxonomy slug and rewrite slug.
+ * @param string|null $slug      (Optional) Prefix of rewrite slug. Default is $post_type.
  */
-function register_post_type_specific_taxonomy( array $args, string $post_type, string $suffix = 'category', string $slug = null ): void {
+function register_post_type_specific_taxonomy( array $args, string $post_type, string $suffix = 'category', ?string $slug = null ): void {
 	$slug  = $slug ?? $post_type;
 	$args += array(
 		'show_admin_column' => true,
