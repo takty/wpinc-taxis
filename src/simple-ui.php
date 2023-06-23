@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-03-23
+ * @version 2023-06-22
  */
 
 namespace wpinc\taxo\simple_ui;
@@ -48,7 +48,7 @@ function _initialize_rest_hooks(): void {
  * @return \WP_REST_Response Response object.
  */
 function _cb_rest_prepare_taxonomy( \WP_REST_Response $response, \WP_Taxonomy $item, \WP_REST_Request $request ): \WP_REST_Response {
-	$ctx = empty( $request['context'] ) ? 'view' : $request['context'];
+	$ctx = $request->get_param( 'context' ) ?? 'view';
 
 	if ( 'edit' === $ctx && false === $item->meta_box_cb ) {
 		$data = $response->get_data();
