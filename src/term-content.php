@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-06-03
+ * @version 2023-07-15
  */
 
 namespace wpinc\taxo;
@@ -36,14 +36,15 @@ function add_term_content_field( string $taxonomy, string $key, string $label_su
 	add_action(
 		"edited_$taxonomy",
 		function ( $term_id ) use ( $key ) {
-			$val = $_POST[ $key ] ?? null;  // phpcs:ignore
-			if ( null !== $val ) {
-				if ( empty( $val ) ) {
-					delete_term_meta( $term_id, $key );
-				} else {
-					$val = apply_filters( 'content_save_pre', $val );
-					update_term_meta( $term_id, $key, $val );
-				}
+			if ( ! isset( $_POST[ $key ] ) ) {  // phpcs:ignore
+				return;  // When called through bulk edit.
+			}
+			$val = $_POST[ $key ];  // phpcs:ignore
+			if ( empty( $val ) ) {
+				delete_term_meta( $term_id, $key );
+			} else {
+				$val = apply_filters( 'content_save_pre', $val );
+				update_term_meta( $term_id, $key, $val );
 			}
 		}
 	);

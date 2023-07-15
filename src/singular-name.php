@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-07
+ * @version 2023-07-14
  */
 
 namespace wpinc\taxo {
@@ -77,8 +77,10 @@ namespace wpinc\taxo\singular_name {
 	 */
 	function _cb_edited_tx( int $term_id ) {
 		$key = _get_instance()->key;
-		$val = $_POST[ $key ] ?? '';  // phpcs:ignore
-
+		if ( ! isset( $_POST[ $key ] ) ) {  // phpcs:ignore
+			return;  // When called through bulk edit.
+		}
+		$val = $_POST[ $key ];  // phpcs:ignore
 		if ( empty( $val ) ) {
 			return delete_term_meta( $term_id, $key );
 		}
