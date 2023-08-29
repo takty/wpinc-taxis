@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-02-22
+ * @version 2023-08-29
  */
 
 namespace wpinc\taxo\exclusive_taxonomy;
@@ -24,7 +24,9 @@ function add_taxonomy( $taxonomy_s ): void {
 	if ( empty( $inst->txs ) ) {
 		_initialize_hooks();
 	}
-	array_push( $inst->txs, ...$txs );
+	if ( ! empty( $txs ) ) {
+		array_push( $inst->txs, ...$txs );
+	}
 }
 
 /**
