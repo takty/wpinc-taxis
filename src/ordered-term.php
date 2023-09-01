@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-06-22
+ * @version 2023-09-01
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -30,7 +30,7 @@ function add_taxonomy( $taxonomy_s ): void {
 /**
  * Activate ordered terms.
  *
- * @param array $args {
+ * @param array<string, mixed> $args {
  *     (Optional) Configuration arguments.
  *
  *     @type string 'order_key' Key of term metadata for order. Default '_menu_order'.
@@ -71,7 +71,7 @@ function activate( array $args = array() ): void {
 function _add_hook_for_specific_taxonomy( string $tx ): void {
 	add_filter( "manage_edit-{$tx}_columns", '\wpinc\taxo\ordered_term\_cb_manage_edit_taxonomy_columns' );
 	add_filter( "manage_edit-{$tx}_sortable_columns", '\wpinc\taxo\ordered_term\_cb_manage_edit_taxonomy_sortable_columns' );
-	add_action( "manage_{$tx}_custom_column", '\wpinc\taxo\ordered_term\_cb_manage_taxonomy_custom_column', 10, 3 );
+	add_filter( "manage_{$tx}_custom_column", '\wpinc\taxo\ordered_term\_cb_manage_taxonomy_custom_column', 10, 3 );
 	add_action( "{$tx}_edit_form_fields", '\wpinc\taxo\ordered_term\_cb_taxonomy_edit_form_fields' );
 	add_action( "edited_{$tx}", '\wpinc\taxo\ordered_term\_cb_edited_taxonomy', 10, 2 );
 }
@@ -138,7 +138,7 @@ function _cb_manage_taxonomy_custom_column( string $string, string $column_name,
 		return $string;
 	}
 	$idx = get_term_meta( absint( $term_id ), $inst->key_order, true );
-	if ( false !== $idx || '' !== $idx ) {  // DO NOT USE 'empty'.
+	if ( false !== $idx && '' !== $idx ) {  // DO NOT USE 'empty'.
 		$string .= esc_html( $idx );
 	}
 	return $string;
@@ -259,10 +259,10 @@ function _cb_quick_edit_custom_box( string $column_name, string $post_type, stri
 /**
  * Callback function for 'terms_clauses' filter.
  *
- * @param string[] $pieces Array of query SQL clauses.
- * @param string[] $txs    An array of taxonomy names.
- * @param array    $args   An array of term query arguments.
- * @return array Filtered clauses.
+ * @param string[]             $pieces Array of query SQL clauses.
+ * @param string[]             $txs    An array of taxonomy names.
+ * @param array<string, mixed> $args   An array of term query arguments.
+ * @return array<string, mixed> Filtered clauses.
  */
 function _cb_terms_clauses( array $pieces, array $txs, array $args ): array {
 	$inst = _get_instance();
@@ -293,7 +293,7 @@ function _cb_terms_clauses( array $pieces, array $txs, array $args ): array {
  * @param \WP_Term[]|\WP_Error $terms    Array of attached terms, or WP_Error on failure.
  * @param int                  $post_id  Post ID.
  * @param string               $taxonomy Taxonomy slug.
- * @return mixed Filtered terms.
+ * @return \WP_Term[]|\WP_Error Filtered terms.
  */
 function _cb_get_the_terms( $terms, int $post_id, string $taxonomy ) {
 	if ( ! is_wp_error( $terms ) ) {
@@ -303,22 +303,47 @@ function _cb_get_the_terms( $terms, int $post_id, string $taxonomy ) {
 }
 
 /**
- * Sorts terms.
+ * Sorts terms by order.
  *
- * @param int[]|\WP_Term[] $terms_id_obj Array of WP_Terms or term_ids.
- * @param string           $taxonomy     Taxonomy slug.
- * @return array Sorted terms.
+ * @param \WP_Term[] $terms    Array of WP_Terms.
+ * @param string     $taxonomy Taxonomy slug.
+ * @return \WP_Term[] Sorted terms.
  */
-function sort_terms( array $terms_id_obj, string $taxonomy ): array {
+function sort_terms( array $terms, string $taxonomy ): array {
 	$inst = _get_instance();
 	if ( ! in_array( $taxonomy, $inst->txs, true ) ) {
-		return $terms_id_obj;
+		return $terms;
 	}
 	$tos = array();
-	foreach ( $terms_id_obj as $t ) {
-		$tid   = is_int( $t ) ? $t : $t->term_id;
-		$idx   = (int) get_term_meta( $tid, $inst->key_order, true );
+	foreach ( $terms as $t ) {
+		$idx   = (int) get_term_meta( $t->term_id, $inst->key_order, true );
 		$tos[] = array( $idx, $t );
+	}
+	usort(
+		$tos,
+		function ( $a, $b ) {
+			return $a[0] <=> $b[0];
+		}
+	);
+	return array_column( $tos, 1 );
+}
+
+/**
+ * Sorts term ids by order.
+ *
+ * @param int[]  $term_ids Array of term IDs.
+ * @param string $taxonomy Taxonomy slug.
+ * @return int[] Sorted terms.
+ */
+function sort_term_ids( array $term_ids, string $taxonomy ): array {
+	$inst = _get_instance();
+	if ( ! in_array( $taxonomy, $inst->txs, true ) ) {
+		return $term_ids;
+	}
+	$tos = array();
+	foreach ( $term_ids as $tid ) {
+		$idx   = (int) get_term_meta( $tid, $inst->key_order, true );
+		$tos[] = array( $idx, $tid );
 	}
 	usort(
 		$tos,
@@ -391,6 +416,9 @@ function _cb_edited_taxonomy__post_term_order( int $term_id, int $tt_id ): void 
 	$inst = _get_instance();
 	$t    = get_term_by( 'term_taxonomy_id', $tt_id );
 
+	if ( ! ( $t instanceof \WP_Term ) ) {
+		return;
+	}
 	$ps = get_posts(
 		array(
 			'post_type' => $inst->post_term_order_post_types,
@@ -454,7 +482,7 @@ function _get_instance(): object {
 		/**
 		 * Taxonomies with order.
 		 *
-		 * @var array
+		 * @var string[]
 		 */
 		public $txs = array();
 
@@ -472,7 +500,7 @@ function _get_instance(): object {
 		/**
 		 * Array of post types that post term order is enabled.
 		 *
-		 * @var array
+		 * @var string[]
 		 */
 		public $post_term_order_post_types = array();
 

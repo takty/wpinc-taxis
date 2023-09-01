@@ -4,14 +4,14 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-07-14
+ * @version 2023-08-30
  */
 
 namespace wpinc\taxo {
 	/**
 	 * Enables singular name for each terms.
 	 *
-	 * @param array $args {
+	 * @param array<string, mixed> $args {
 	 *     Configuration arguments.
 	 *
 	 *     @type array  'taxonomies'        Array of taxonomy slugs.
@@ -32,7 +32,7 @@ namespace wpinc\taxo {
 		}
 
 		global $pagenow;
-		if ( ! is_admin() || ( is_admin() && in_array( $pagenow, array( 'post-new.php', 'post.php', 'edit.php' ), true ) ) ) {
+		if ( ! is_admin() || in_array( $pagenow, array( 'post-new.php', 'post.php', 'edit.php' ), true ) ) {
 			foreach ( $txs as $tx ) {
 				add_filter( "get_{$tx}", '\wpinc\taxo\singular_name\_cb_get_taxonomy', 10 );
 			}
@@ -75,16 +75,17 @@ namespace wpinc\taxo\singular_name {
 	 *
 	 * @param int $term_id Term ID.
 	 */
-	function _cb_edited_tx( int $term_id ) {
+	function _cb_edited_tx( int $term_id ): void {
 		$key = _get_instance()->key;
 		if ( ! isset( $_POST[ $key ] ) ) {  // phpcs:ignore
 			return;  // When called through bulk edit.
 		}
 		$val = $_POST[ $key ];  // phpcs:ignore
 		if ( empty( $val ) ) {
-			return delete_term_meta( $term_id, $key );
+			delete_term_meta( $term_id, $key );
+		} else {
+			update_term_meta( $term_id, $key, $val );
 		}
-		return update_term_meta( $term_id, $key, $val );
 	}
 
 	/**

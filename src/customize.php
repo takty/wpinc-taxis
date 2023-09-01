@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-03-23
+ * @version 2023-09-01
  */
 
 namespace wpinc\taxo;
@@ -84,7 +84,7 @@ function set_taxonomy_post_type_specific( $taxonomy_s, string $post_type ): void
 	if ( is_admin() ) {
 		return;
 	}
-	$txs = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
+	$txs = (array) $taxonomy_s;
 	add_action(
 		'pre_get_posts',
 		function ( $query ) use ( $txs, $post_type ) {

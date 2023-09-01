@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2022-11-18
+ * @version 2023-08-31
  */
 
 namespace wpinc\taxo;
@@ -33,24 +33,25 @@ function get_term_name( \WP_Term $term, bool $singular = false ): string {
 /**
  * Retrieves the term names.
  *
- * @param string|array $taxonomy Taxonomy slug or arguments for get_terms.
- * @param bool         $singular Whether to get singular name. Default false.
+ * @param array<string, mixed>|string $args     Arguments for get_terms.
+ * @param bool                        $singular Whether to get singular name. Default false.
  * @return string[] Array of term names on success.
  */
-function get_term_names( $taxonomy, bool $singular = false ): array {
-	if ( ! is_array( $taxonomy ) ) {
-		$taxonomy = array( 'taxonomy' => $taxonomy );
+function get_term_names( $args, bool $singular = false ): array {
+	if ( ! is_array( $args ) ) {
+		$args = array( 'taxonomy' => $args );
 	}
-	$ts = get_terms( $taxonomy );
+	$args['fields'] = 'all';
+
+	$ts = get_terms( $args );
 	if ( ! is_array( $ts ) ) {
 		return array();
 	}
-	return array_map(
-		function ( $t ) use ( $singular ) {
-			return get_term_name( $t, $singular );
-		},
-		$ts
-	);
+	$ns = array();
+	foreach ( $ts as $t ) {
+		$ns[] = ( $t instanceof \WP_Term ) ? get_term_name( $t, $singular ) : '';
+	}
+	return $ns;
 }
 
 /**
@@ -81,14 +82,14 @@ function get_the_term_names( $post_id_obj, string $taxonomy, bool $singular = fa
 /**
  * Makes term list.
  *
- * @param array $args_get_terms Arguments for get_terms.
- * @param array $args {
+ * @param array<string, mixed> $args_get_terms Arguments for get_terms.
+ * @param array<string, mixed> $args {
  *     Arguments.
  *
  *     @type string     'before'       Content to prepend to the output. Default ''.
  *     @type string     'after'        Content to append to the output. Default ''.
  *     @type string     'separator'    Separator among the term tags. Default ''.
- *     @type WP_Term    'current_term' Current term. Default queried object.
+ *     @type \WP_Term   'current_term' Current term. Default queried object.
  *     @type bool       'do_add_link'  Whether to make items link.
  *     @type bool       'singular'     Whether to use singular label when available.
  *     @type callable   'filter'       Filter function for escaping for HTML.
@@ -113,7 +114,7 @@ function get_term_list( array $args_get_terms, array $args ): string {
 	if ( ! $args['current_term'] ) {
 		global $wp_query;
 		$qo = $wp_query->queried_object;
-		if ( $qo instanceof WP_Term || ( is_object( $qo ) && property_exists( $qo, 'term_id' ) ) ) {
+		if ( $qo instanceof \WP_Term || ( is_object( $qo ) && property_exists( $qo, 'term_id' ) ) ) {
 			$args['current_term'] = $qo;
 		}
 	}
@@ -124,15 +125,15 @@ function get_term_list( array $args_get_terms, array $args ): string {
 /**
  * Makes the term list.
  *
- * @param int|\WP_Post $post_id_obj Post ID or object.
- * @param string       $taxonomy    Taxonomy slug.
- * @param array        $args {
+ * @param int|\WP_Post         $post_id_obj Post ID or object.
+ * @param string               $taxonomy    Taxonomy slug.
+ * @param array<string, mixed> $args {
  *     Arguments.
  *
  *     @type string     'before'       Content to prepend to the output. Default ''.
  *     @type string     'after'        Content to append to the output. Default ''.
  *     @type string     'separator'    Separator among the term tags. Default ''.
- *     @type WP_Term    'current_term' Current term. Default queried object.
+ *     @type \WP_Term   'current_term' Current term. Default queried object.
  *     @type bool       'do_add_link'  Whether to make items link.
  *     @type bool       'singular'     Whether to use singular label when available.
  *     @type callable   'filter'       Filter function for escaping for HTML.
@@ -165,15 +166,15 @@ function get_the_term_list( $post_id_obj, string $taxonomy, array $args ): strin
 /**
  * Outputs the term list.
  *
- * @param int|\WP_Post $post_id_obj Post ID or object.
- * @param string       $taxonomy    Taxonomy slug.
- * @param array        $args {
+ * @param int|\WP_Post         $post_id_obj Post ID or object.
+ * @param string               $taxonomy    Taxonomy slug.
+ * @param array<string, mixed> $args {
  *     Arguments.
  *
  *     @type string     'before'       Content to prepend to the output. Default ''.
  *     @type string     'after'        Content to append to the output. Default ''.
  *     @type string     'separator'    Separator among the term tags. Default ''.
- *     @type WP_Term    'current_term' Current term. Default queried object.
+ *     @type \WP_Term   'current_term' Current term. Default queried object.
  *     @type bool       'do_add_link'  Whether to make items link.
  *     @type bool       'singular'     Whether to use singular label when available.
  *     @type callable   'filter'       Filter function for escaping for HTML.
@@ -196,7 +197,11 @@ function _insert_root( array $terms ): array {
 	$added  = array();
 	foreach ( $terms as $t ) {
 		if ( 0 !== $t->parent ) {
-			list( $r ) = \wpinc\taxo\get_term_root( $t );
+			$as = \wpinc\taxo\get_term_root( $t );
+			if ( ! $as ) {
+				continue;
+			}
+			$r = $as[0];
 			if ( ! isset( $added[ $r->term_id ] ) ) {
 				$new_ts[]             = $r;
 				$added[ $r->term_id ] = true;
@@ -211,16 +216,16 @@ function _insert_root( array $terms ): array {
 /**
  * Makes term tag array.
  *
- * @param array $args {
+ * @param array<string, mixed> $args {
  *     Arguments.
  *
  *     @type \WP_Term[] 'terms'        Terms.
- *     @type WP_Term    'current_term' Current term.
+ *     @type \WP_Term   'current_term' Current term.
  *     @type bool       'do_add_link'  Whether to make items link.
  *     @type bool       'singular'     Whether to use singular label when available.
  *     @type callable   'filter'       Filter function for escaping for HTML.
  * }
- * @return array Array of term tags.
+ * @return string[] Array of term tags.
  */
 function make_term_list( array $args = array() ): array {
 	$args += array(
@@ -254,7 +259,7 @@ function make_term_list( array $args = array() ): array {
 			$links[] = "<span $cls>$name</span>";
 		}
 	}
-	if ( ! empty( $args['terms'] ) ) {
+	if ( is_array( $args['terms'] ) && ! empty( $args['terms'] ) && $args['terms'][0] instanceof \WP_Term ) {
 		$links = apply_filters( "term_links-{$args['terms'][0]->taxonomy}", $links );  // phpcs:ignore
 	}
 	return $links;

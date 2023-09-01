@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-06-22
+ * @version 2023-08-30
  */
 
 namespace wpinc\taxo;
@@ -12,7 +12,7 @@ namespace wpinc\taxo;
 /**
  * Adds terms to a specific taxonomy.
  *
- * @param array $args {
+ * @param array<string, mixed> $args {
  *     Arguments.
  *
  *     @type string     'taxonomy'        Taxonomy.
@@ -51,11 +51,11 @@ function add_terms( array $args ): void {
  *
  * @access private
  *
- * @param array $args          Arguments.
- * @param array $slug_to_label An array of slug to label.
- * @param int   $parent_id     Term ID of the parent term. Default 0.
- * @param int   $parent_idx    Index of the parent term. Default 0.
- * @param int   $depth         Depth of order. Default 0.
+ * @param array<string, mixed>               $args          Arguments.
+ * @param array<string, array<mixed>|string> $slug_to_label An array of slug to label.
+ * @param int                                $parent_id     Term ID of the parent term. Default 0.
+ * @param int                                $parent_idx    Index of the parent term. Default 0.
+ * @param int                                $depth         Depth of order. Default 0.
  */
 function _add_terms( array $args, array $slug_to_label, int $parent_id = 0, int $parent_idx = 0, int $depth = 0 ): void {
 	$cur_order = is_array( $args['orders'] ) ? $args['orders'][ $depth ] : array( 1, 1 );
@@ -67,9 +67,9 @@ function _add_terms( array $args, array $slug_to_label, int $parent_id = 0, int 
 	foreach ( $slug_to_label as $slug => $data ) {
 		list( $l, $sl ) = is_array( $data ) ? $data : array( $data, null );
 
-		$ret = _add_term_one( $args, $slug, $l, $parent_id, $idx );
-		if ( $ret && ! is_wp_error( $ret ) && $sl ) {
-			_add_terms( $args, $sl, $ret['term_id'], $idx, $depth + 1 );
+		$term_id = _add_term_one( $args, $slug, $l, $parent_id, $idx );
+		if ( $term_id && $sl ) {
+			_add_terms( $args, $sl, $term_id, $idx, $depth + 1 );
 		}
 		$idx += $order_inc;
 	}
@@ -80,23 +80,23 @@ function _add_terms( array $args, array $slug_to_label, int $parent_id = 0, int 
  *
  * @access private
  *
- * @param array  $args      Arguments.
- * @param string $slug      Slug.
- * @param string $label     Label.
- * @param int    $parent_id Term ID of the parent term.
- * @param int    $idx       Index.
- * @return array Return value of wp_insert_term or wp_update_term.
+ * @param array<string, mixed> $args      Arguments.
+ * @param string               $slug      Slug.
+ * @param string               $label     Label.
+ * @param int                  $parent_id Term ID of the parent term.
+ * @param int                  $idx       Index.
+ * @return int|null The term ID of inserted or updated term or null.
  */
-function _add_term_one( array $args, string $slug, string $label, int $parent_id, int $idx ): array {
+function _add_term_one( array $args, string $slug, string $label, int $parent_id, int $idx ): ?int {
 	$meta = $args['meta'];
 	if ( $meta ) {
 		$meta_keys = $meta['keys'];
 		$meta_vals = explode( $meta['delimiter'], $label );
-		$label     = array_shift( $meta_vals );
+		$label     = array_shift( $meta_vals ) ?? $label;
 	}
 	$t = get_term_by( 'slug', $slug, $args['taxonomy'] );
 
-	$ret = false;
+	$ret = null;
 	if ( false === $t ) {
 		$ret = wp_insert_term(
 			$label,
@@ -106,19 +106,24 @@ function _add_term_one( array $args, string $slug, string $label, int $parent_id
 				'parent' => $parent_id,
 			)
 		);
-	} elseif ( $args['do_force_update'] ) {
+	} elseif ( $t instanceof \WP_Term && $args['do_force_update'] ) {
 		$ret = wp_update_term( $t->term_id, $args['taxonomy'], array( 'name' => $label ) );
 	}
-	if ( $ret && ! is_wp_error( $ret ) ) {
+	if ( is_wp_error( $ret ) ) {
+		$ret = null;
+	};
+	if ( $ret ) {
 		if ( $args['order_key'] ) {
 			update_term_meta( $ret['term_id'], $args['order_key'], $idx );
 		}
-		if ( is_array( $meta_vals ) && 0 < count( $meta_vals ) ) {
-			$count = min( count( $meta_keys ), count( $meta_vals ) );
-			for ( $i = 0; $i < $count; ++$i ) {
-				update_term_meta( $ret['term_id'], $meta_keys[ $i ], $meta_vals[ $i ] );
+		if ( $meta ) {
+			if ( is_array( $meta_vals ) && 0 < count( $meta_vals ) ) {
+				$count = min( count( $meta_keys ), count( $meta_vals ) );
+				for ( $i = 0; $i < $count; ++$i ) {
+					update_term_meta( $ret['term_id'], $meta_keys[ $i ], $meta_vals[ $i ] );
+				}
 			}
 		}
 	}
-	return $ret;
+	return $ret ? $ret['term_id'] : null;
 }

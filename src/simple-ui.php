@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-06-22
+ * @version 2023-08-31
  */
 
 namespace wpinc\taxo\simple_ui;
@@ -123,7 +123,8 @@ function _cb_current_screen(): void {
 	global $pagenow;
 
 	if ( 'post-new.php' === $pagenow || 'post.php' === $pagenow ) {
-		if ( get_current_screen()->is_block_editor() ) {
+		$cs = get_current_screen();
+		if ( $cs && $cs->is_block_editor() ) {
 			add_action( 'enqueue_block_editor_assets', '\wpinc\taxo\simple_ui\_cb_enqueue_block_editor_assets' );
 		} else {
 			// Remove UI elements from metabox for classic editor.
@@ -149,7 +150,7 @@ function _cb_enqueue_block_editor_assets(): void {
 		'wpinc-custom-taxonomy',
 		\wpinc\abs_url( $url_to, './assets/js/custom-taxonomy.min.js' ),
 		array( 'wp-i18n', 'wp-data', 'wp-components', 'wp-compose', 'wp-element', 'wp-url' ),
-		filemtime( __DIR__ . '/assets/js/custom-taxonomy.min.js' ),
+		(string) filemtime( __DIR__ . '/assets/js/custom-taxonomy.min.js' ),
 		true
 	);
 	$val  = _get_target_taxonomy_slugs_json( $inst->txs );
@@ -186,7 +187,7 @@ function _get_target_taxonomy_slugs_json( array $tx_slugs ): string {
 	if ( count( $wp_taxonomies ) === count( $ret ) ) {
 		return "'*'";
 	}
-	return wp_json_encode( $ret );
+	return (string) wp_json_encode( $ret );
 }
 
 
@@ -236,7 +237,7 @@ function _get_instance(): object {
 		/**
 		 * The target taxonomies.
 		 *
-		 * @var array|null
+		 * @var string[]
 		 */
 		public $txs = array();
 	};

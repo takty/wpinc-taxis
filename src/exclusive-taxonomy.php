@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-08-29
+ * @version 2023-08-31
  */
 
 namespace wpinc\taxo\exclusive_taxonomy;
@@ -98,12 +98,12 @@ function _cb_admin_print_footer_scripts(): void {
 /**
  * Callback function for 'set_object_terms' action.
  *
- * @param int    $object_id  Object ID.
- * @param array  $terms      An array of object term IDs or slugs.
- * @param array  $tt_ids     An array of term taxonomy IDs.
- * @param string $taxonomy   Taxonomy slug.
- * @param bool   $append     Whether to append new terms to the old terms.
- * @param array  $old_tt_ids Old array of term taxonomy IDs.
+ * @param int            $object_id  Object ID.
+ * @param int[]|string[] $terms      An array of object term IDs or slugs.
+ * @param int[]          $tt_ids     An array of term taxonomy IDs.
+ * @param string         $taxonomy   Taxonomy slug.
+ * @param bool           $append     Whether to append new terms to the old terms.
+ * @param int[]          $old_tt_ids Old array of term taxonomy IDs.
  */
 function _cb_set_object_terms( int $object_id, array $terms, array $tt_ids, string $taxonomy, bool $append, array $old_tt_ids ): void {
 	$inst = _get_instance();
@@ -133,16 +133,17 @@ function _cb_set_object_terms( int $object_id, array $terms, array $tt_ids, stri
  *
  * @param int[]  $tt_ids   Array of term_taxonomy_ids.
  * @param string $taxonomy Taxonomy slug.
- * @return array Sorted term_taxonomy_ids.
+ * @return int[] Sorted term_taxonomy_ids.
  */
 function _sort_term_taxonomy_ids( array $tt_ids, string $taxonomy ): array {
 	if ( function_exists( '\wpinc\taxo\ordered_term\sort_terms' ) ) {
-		$ts = array_map(
-			function ( $tt_id ) {
-				return get_term_by( 'term_taxonomy_id', $tt_id );
-			},
-			$tt_ids
-		);
+		$ts = array();
+		foreach ( $tt_ids as $tt_id ) {
+			$t = get_term_by( 'term_taxonomy_id', $tt_id );
+			if ( $t instanceof \WP_Term ) {
+				$ts[] = $t;
+			}
+		}
 		$ts = \wpinc\taxo\ordered_term\sort_terms( $ts, $taxonomy );
 
 		$tt_ids = array_column( $ts, 'term_taxonomy_id' );
@@ -160,7 +161,8 @@ function _sort_term_taxonomy_ids( array $tt_ids, string $taxonomy ): array {
 function _cb_current_screen(): void {
 	global $pagenow;
 	if ( 'post-new.php' === $pagenow || 'post.php' === $pagenow ) {
-		if ( get_current_screen()->is_block_editor() ) {
+		$cs = get_current_screen();
+		if ( $cs && $cs->is_block_editor() ) {
 			add_action( 'enqueue_block_editor_assets', '\wpinc\taxo\exclusive_taxonomy\_cb_enqueue_block_editor_assets' );
 		} else {
 			add_action( 'admin_print_footer_scripts', '\wpinc\taxo\exclusive_taxonomy\_cb_admin_print_footer_scripts_ce' );
@@ -184,7 +186,7 @@ function _cb_enqueue_block_editor_assets(): void {
 		'wpinc-custom-taxonomy',
 		\wpinc\abs_url( $url_to, './assets/js/custom-taxonomy.min.js' ),
 		array( 'wp-i18n', 'wp-data', 'wp-components', 'wp-compose', 'wp-element', 'wp-url' ),
-		filemtime( __DIR__ . '/assets/js/custom-taxonomy.min.js' ),
+		(string) filemtime( __DIR__ . '/assets/js/custom-taxonomy.min.js' ),
 		true
 	);
 	$val  = empty( $inst->txs ) ? "'*'" : wp_json_encode( $inst->txs );
@@ -236,7 +238,7 @@ function _get_instance(): object {
 		/**
 		 * The target taxonomies.
 		 *
-		 * @var array
+		 * @var string[]
 		 */
 		public $txs = array();
 	};
