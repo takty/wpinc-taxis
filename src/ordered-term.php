@@ -127,21 +127,21 @@ function _cb_manage_edit_taxonomy_sortable_columns( array $sortable_columns ): a
  *
  * @access private
  *
- * @param string $string      Blank string.
+ * @param string $str         Blank string.
  * @param string $column_name Name of the column.
  * @param int    $term_id     Term ID.
  * @return string String.
  */
-function _cb_manage_taxonomy_custom_column( string $string, string $column_name, int $term_id ): string {
+function _cb_manage_taxonomy_custom_column( string $str, string $column_name, int $term_id ): string {
 	$inst = _get_instance();
 	if ( $column_name !== $inst->key_order ) {
-		return $string;
+		return $str;
 	}
 	$idx = get_term_meta( absint( $term_id ), $inst->key_order, true );
 	if ( false !== $idx && '' !== $idx ) {  // DO NOT USE 'empty'.
-		$string .= esc_html( $idx );
+		$str .= esc_html( $idx );
 	}
-	return $string;
+	return $str;
 }
 
 /**
