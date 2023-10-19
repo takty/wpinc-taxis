@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-09-01
+ * @version 2023-10-19
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -281,7 +281,6 @@ function _cb_terms_clauses( array $pieces, array $txs, array $args ): array {
 		return $pieces;
 	}
 	global $wpdb;
-	$pieces['fields'] .= ', tm.meta_key, tm.meta_value';
 	$pieces['join']   .= " LEFT OUTER JOIN {$wpdb->termmeta} AS tm ON t.term_id = tm.term_id AND tm.meta_key = '{$inst->key_order}'";
 	$pieces['orderby'] = str_replace( 'ORDER BY', "ORDER BY tm.meta_value+0 $order,", $pieces['orderby'] );
 	return $pieces;
