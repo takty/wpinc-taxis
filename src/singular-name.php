@@ -7,6 +7,8 @@
  * @version 2023-10-20
  */
 
+declare(strict_types=1);
+
 namespace wpinc\taxo {  // phpcs:ignore
 	/** phpcs:ignore
 	 * Enables singular name for each terms.

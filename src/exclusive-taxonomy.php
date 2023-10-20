@@ -7,6 +7,8 @@
  * @version 2023-10-20
  */
 
+declare(strict_types=1);
+
 namespace wpinc\taxo\exclusive_taxonomy;
 
 require_once __DIR__ . '/assets/asset-url.php';

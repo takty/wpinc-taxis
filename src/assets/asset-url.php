@@ -4,8 +4,10 @@
  *
  * @package Wpinc
  * @author Takuto Yanagida
- * @version 2023-10-19
+ * @version 2023-10-20
  */
+
+declare(strict_types=1);
 
 namespace wpinc;
 
