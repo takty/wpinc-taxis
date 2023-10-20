@@ -4,10 +4,13 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-08-31
+ * @version 2023-10-20
  */
 
 namespace wpinc\taxo\simple_ui;
+
+require_once __DIR__ . '/assets/asset-url.php';
+require_once __DIR__ . '/customize.php';
 
 /**
  * Activates simple taxonomy UIs.
@@ -52,9 +55,10 @@ function _cb_rest_prepare_taxonomy( \WP_REST_Response $response, \WP_Taxonomy $i
 
 	if ( 'edit' === $ctx && false === $item->meta_box_cb ) {
 		$data = $response->get_data();
-
-		$data['visibility']['show_ui'] = false;
-		$response->set_data( $data );
+		if ( is_array( $data ) && isset( $data['visibility'] ) && is_array( $data['visibility'] ) ) {
+			$data['visibility']['show_ui'] = false;
+			$response->set_data( $data );
+		}
 	}
 	return $response;
 }
@@ -69,7 +73,7 @@ function _initialize_hooks(): void {
 		// Change term selection UI from textarea to checkboxes for classic editor and list.
 		add_action( 'admin_init', '\wpinc\taxo\simple_ui\_cb_admin_init' );
 	}
-	add_action( 'current_screen', '\wpinc\taxo\simple_ui\_cb_current_screen' );
+	add_action( 'current_screen', '\wpinc\taxo\simple_ui\_cb_current_screen', 10, 0 );
 }
 
 /**
@@ -226,7 +230,9 @@ function _cb_admin_head_ce(): void {
  *
  * @access private
  *
- * @return object Instance.
+ * @return object{
+ *     txs: string[],
+ * } Instance.
  */
 function _get_instance(): object {
 	static $values = null;

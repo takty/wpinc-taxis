@@ -4,13 +4,17 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-08-31
+ * @version 2023-10-20
  */
 
 namespace wpinc\taxo;
 
+require_once __DIR__ . '/customize.php';
+
 /**
  * Creates a taxonomy object.
+ *
+ * @psalm-suppress ArgumentTypeCoercion
  *
  * @param array<string, mixed> $args      Arguments.
  * @param string               $post_type Post type.
@@ -29,7 +33,7 @@ function register_post_type_specific_taxonomy( array $args, string $post_type, s
 		'with_front' => false,
 		'slug'       => "$slug/$suffix",
 	);
-	register_taxonomy( "{$post_type}_$suffix", $post_type, $args );
+	register_taxonomy( "{$post_type}_$suffix", $post_type, $args );  // @phpstan-ignore-line
 	set_taxonomy_post_type_specific( array( "{$post_type}_$suffix" ), $post_type );
 }
 

@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-19
+ * @version 2023-10-20
  */
 
 namespace wpinc\taxo\ordered_term;
@@ -18,7 +18,7 @@ function add_taxonomy( $taxonomy_s ): void {
 	$txs  = is_array( $taxonomy_s ) ? $taxonomy_s : array( $taxonomy_s );
 	$inst = _get_instance();
 
-	$inst->txs = array_merge( $inst->txs, $txs );
+	$inst->txs = array_merge( $inst->txs, $txs );  // @phpstan-ignore-line
 
 	if ( $inst->is_activated && is_admin() ) {
 		foreach ( $txs as $tx ) {
@@ -29,6 +29,8 @@ function add_taxonomy( $taxonomy_s ): void {
 
 /**
  * Activate ordered terms.
+ *
+ * @global string $pagenow
  *
  * @param array<string, mixed> $args {
  *     (Optional) Configuration arguments.
@@ -41,17 +43,17 @@ function activate( array $args = array() ): void {
 	if ( $inst->is_activated ) {
 		return;
 	}
-	$inst->is_activated = true;
+	$inst->is_activated = true;  // @phpstan-ignore-line
 
 	$args += array( 'order_key' => '_menu_order' );
 
-	$inst->key_order = $args['order_key'];
+	$inst->key_order = $args['order_key'];  // @phpstan-ignore-line
 
+	global $pagenow;
 	if ( is_admin() ) {
 		foreach ( $inst->txs as $tx ) {
 			_add_hook_for_specific_taxonomy( $tx );
 		}
-		global $pagenow;
 		if ( 'edit-tags.php' === $pagenow ) {
 			add_action( 'admin_head', '\wpinc\taxo\ordered_term\_cb_admin_head' );
 			add_action( 'quick_edit_custom_box', '\wpinc\taxo\ordered_term\_cb_quick_edit_custom_box', 10, 3 );
@@ -85,7 +87,8 @@ function _add_hook_for_specific_taxonomy( string $tx ): void {
 function get_order( $term_id_obj ): int {
 	$inst    = _get_instance();
 	$term_id = is_numeric( $term_id_obj ) ? $term_id_obj : $term_id_obj->term_id;
-	return (int) get_term_meta( $term_id, $inst->key_order, true );
+	$val     = get_term_meta( $term_id, $inst->key_order, true );
+	return is_numeric( $val ) ? (int) $val : 0;
 }
 
 
@@ -138,8 +141,8 @@ function _cb_manage_taxonomy_custom_column( string $str, string $column_name, in
 		return $str;
 	}
 	$idx = get_term_meta( absint( $term_id ), $inst->key_order, true );
-	if ( false !== $idx && '' !== $idx ) {  // DO NOT USE 'empty'.
-		$str .= esc_html( $idx );
+	if ( is_numeric( $idx ) ) {
+		$str .= esc_html( '' . ( (int) $idx ) );
 	}
 	return $str;
 }
@@ -153,7 +156,7 @@ function _cb_manage_taxonomy_custom_column( string $str, string $column_name, in
 function _cb_taxonomy_edit_form_fields( \WP_Term $term ): void {
 	$inst = _get_instance();
 	$idx  = get_term_meta( $term->term_id, $inst->key_order, true );
-	$val  = ( false !== $idx ) ? $idx : '';
+	$val  = is_numeric( $idx ) ? ( '' . ( (int) $idx ) ) : '';
 	$key  = $inst->key_order;
 	?>
 	<tr class="form-field">
@@ -178,7 +181,7 @@ function _cb_taxonomy_edit_form_fields( \WP_Term $term ): void {
 function _cb_edited_taxonomy( int $term_id, int $tt_id ): void {
 	$inst = _get_instance();
 	$val  = $_POST[ $inst->key_order ] ?? null;  // phpcs:ignore
-	if ( null !== $val ) {
+	if ( is_numeric( $val ) ) {
 		update_term_meta( $term_id, $inst->key_order, (int) $val );
 
 		if ( $inst->is_post_term_order_enabled ) {
@@ -227,10 +230,10 @@ function _cb_admin_head(): void {
  * Callback function for 'quick_edit_custom_box' action.
  *
  * @param string $column_name Name of the column to edit.
- * @param string $post_type   The post type slug, or current screen name if this is a taxonomy list table.
+ * @param string $_post_type  The post type slug, or current screen name if this is a taxonomy list table.
  * @param string $taxonomy    The taxonomy name, if any.
  */
-function _cb_quick_edit_custom_box( string $column_name, string $post_type, string $taxonomy ): void {
+function _cb_quick_edit_custom_box( string $column_name, string $_post_type, string $taxonomy ): void {
 	$inst = _get_instance();
 	if ( $column_name !== $inst->key_order || ! in_array( $taxonomy, $inst->txs, true ) ) {
 		return;
@@ -259,6 +262,8 @@ function _cb_quick_edit_custom_box( string $column_name, string $post_type, stri
 /**
  * Callback function for 'terms_clauses' filter.
  *
+ * @global \wpdb $wpdb
+ *
  * @param string[]             $pieces Array of query SQL clauses.
  * @param string[]             $txs    An array of taxonomy names.
  * @param array<string, mixed> $args   An array of term query arguments.
@@ -274,8 +279,10 @@ function _cb_terms_clauses( array $pieces, array $txs, array $args ): array {
 			return $pieces;
 		}
 	}
-	$orderby = $args['orderby'] ?? '';
-	$order   = $args['order'] ?? 'ASC';
+	$orderby = $args['orderby'] ?? null;
+	$orderby = is_string( $orderby ) ? $orderby : '';
+	$order   = $args['order'] ?? null;
+	$order   = is_string( $order ) ? $order : 'ASC';
 
 	if ( 'name' !== $orderby && $inst->key_order !== $orderby ) {
 		return $pieces;
@@ -290,11 +297,11 @@ function _cb_terms_clauses( array $pieces, array $txs, array $args ): array {
  * Callback function for 'get_the_terms' filter.
  *
  * @param \WP_Term[]|\WP_Error $terms    Array of attached terms, or WP_Error on failure.
- * @param int                  $post_id  Post ID.
+ * @param int                  $_post_id Post ID.
  * @param string               $taxonomy Taxonomy slug.
  * @return \WP_Term[]|\WP_Error Filtered terms.
  */
-function _cb_get_the_terms( $terms, int $post_id, string $taxonomy ) {
+function _cb_get_the_terms( $terms, int $_post_id, string $taxonomy ) {
 	if ( ! is_wp_error( $terms ) ) {
 		$terms = sort_terms( $terms, $taxonomy );
 	}
@@ -315,7 +322,8 @@ function sort_terms( array $terms, string $taxonomy ): array {
 	}
 	$tos = array();
 	foreach ( $terms as $t ) {
-		$idx   = (int) get_term_meta( $t->term_id, $inst->key_order, true );
+		$idx   = get_term_meta( $t->term_id, $inst->key_order, true );
+		$idx   = is_numeric( $idx ) ? (int) $idx : 0;
 		$tos[] = array( $idx, $t );
 	}
 	usort(
@@ -341,7 +349,8 @@ function sort_term_ids( array $term_ids, string $taxonomy ): array {
 	}
 	$tos = array();
 	foreach ( $term_ids as $tid ) {
-		$idx   = (int) get_term_meta( $tid, $inst->key_order, true );
+		$idx   = get_term_meta( $tid, $inst->key_order, true );
+		$idx   = is_numeric( $idx ) ? (int) $idx : 0;
 		$tos[] = array( $idx, $tid );
 	}
 	usort(
@@ -367,11 +376,11 @@ function enable_post_term_order( $post_type_s ): void {
 	$inst = _get_instance();
 
 	foreach ( $pts as $pt ) {
-		$inst->post_term_order_post_types[] = $pt;
+		$inst->post_term_order_post_types[] = $pt;  // @phpstan-ignore-line
 	}
 	if ( ! $inst->is_post_term_order_enabled ) {
 		add_action( 'save_post', '\wpinc\taxo\ordered_term\_cb_save_post' );
-		$inst->is_post_term_order_enabled = true;
+		$inst->is_post_term_order_enabled = true;  // @phpstan-ignore-line
 	}
 }
 
@@ -418,6 +427,11 @@ function _cb_edited_taxonomy__post_term_order( int $term_id, int $tt_id ): void 
 	if ( ! ( $t instanceof \WP_Term ) ) {
 		return;
 	}
+	/**
+	 * Posts. This is determined by $args['fields'] being ''.
+	 *
+	 * @var \WP_Post[] $ps
+	 */
 	$ps = get_posts(
 		array(
 			'post_type' => $inst->post_term_order_post_types,
@@ -463,7 +477,13 @@ function _update_order_post_meta( int $post_id, string $taxonomy ): void {
  *
  * @access private
  *
- * @return object Instance.
+ * @return object{
+ *     key_order                 : string,
+ *     txs                       : string[],
+ *     is_activated              : bool,
+ *     post_term_order_post_types: string[],
+ *     is_post_term_order_enabled: bool,
+ * } Instance.
  */
 function _get_instance(): object {
 	static $values = null;

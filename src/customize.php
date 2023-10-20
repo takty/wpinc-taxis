@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-09-01
+ * @version 2023-10-20
  */
 
 namespace wpinc\taxo;
@@ -20,7 +20,9 @@ function disable_taxonomy_metabox_sorting(): void {
 	add_filter(
 		'wp_terms_checklist_args',
 		function ( $args ) {
-			$args['checked_ontop'] = false;
+			if ( is_array( $args ) ) {
+				$args['checked_ontop'] = false;
+			}
 			return $args;
 		}
 	);
@@ -55,14 +57,14 @@ function remove_term_description( $taxonomy_s ): void {
 	foreach ( $txs as $tx ) {
 		add_filter(
 			"manage_edit-{$tx}_columns",
-			function ( $columns ) {
+			function ( array $columns ): array {
 				unset( $columns['description'] );
 				return $columns;
 			}
 		);
 		add_filter(
 			"manage_edit-{$tx}_sortable_columns",
-			function ( $sortable ) {
+			function ( array $sortable ): array {
 				unset( $sortable['description'] );
 				return $sortable;
 			}
@@ -146,8 +148,7 @@ function set_taxonomy_default_term( string $taxonomy, string $default_term_slug,
  */
 function _cb_save_post__set_taxonomy_default_term( int $post_id, string $taxonomy, string $default_term_slug ): void {
 	$ts = wp_get_object_terms( $post_id, $taxonomy );
-	if ( ! is_wp_error( $ts ) && empty( $ts ) ) {
+	if ( is_array( $ts ) && empty( $ts ) ) {
 		wp_set_object_terms( $post_id, $default_term_slug, $taxonomy );
 	}
 }
-

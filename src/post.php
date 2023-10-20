@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-09-01
+ * @version 2023-10-20
  */
 
 namespace wpinc\taxo;
@@ -15,12 +15,17 @@ namespace wpinc\taxo;
 function add_term_ancestors_to_post_class(): void {
 	add_filter(
 		'post_class',
-		function ( array $classes, array $class, int $post_id ) {
+		function ( array $classes, array $cls, int $post_id ) {
 			$txs = get_taxonomies( array( 'public' => true ) );
-			$txs = apply_filters( 'post_class_taxonomies', $txs, $post_id, $classes, $class );
+			/**
+			 * Taxonomies.
+			 *
+			 * @var string[] $txs
+			 */
+			$txs = apply_filters( 'post_class_taxonomies', $txs, $post_id, $classes, $cls );
 
 			$cs = array();
-			foreach ( (array) $txs as $tx ) {
+			foreach ( $txs as $tx ) {
 				$pt = get_post_type( $post_id );
 				if ( $pt && is_object_in_taxonomy( $pt, $tx ) ) {
 					$as = array();
@@ -32,7 +37,7 @@ function add_term_ancestors_to_post_class(): void {
 					}
 					foreach ( $as as $a ) {
 						$t = get_term( $a );
-						if ( empty( $t->slug ) ) {
+						if ( ! ( $t instanceof \WP_Term ) || empty( $t->slug ) ) {
 							continue;
 						}
 
@@ -62,13 +67,15 @@ function add_term_ancestors_to_post_class(): void {
 
 /**
  * Enables 'taxonomy' and 'term' arguments of wp_get_archives.
+ *
+ * @global \wpdb $wpdb
  */
 function limit_archive_links_by_terms(): void {
 	add_filter(
 		'getarchives_join',
 		function ( string $join, array $parsed_args ) {
+			global $wpdb;
 			if ( isset( $parsed_args['taxonomy'] ) && isset( $parsed_args['term'] ) ) {
-				global $wpdb;
 				$join .= " INNER JOIN $wpdb->term_relationships AS tr_wpinc_taxo ON (p.ID = tr_wpinc_taxo.object_id)";
 			}
 			return $join;
@@ -79,10 +86,10 @@ function limit_archive_links_by_terms(): void {
 	add_filter(
 		'getarchives_where',
 		function ( string $where, array $parsed_args ) {
+			global $wpdb;
 			if ( isset( $parsed_args['taxonomy'] ) && isset( $parsed_args['term'] ) ) {
 				$t = get_term_by( 'slug', $parsed_args['term'], $parsed_args['taxonomy'] );
 				if ( $t instanceof \WP_Term ) {
-					global $wpdb;
 					$where .= " AND tr_wpinc_taxo.term_taxonomy_id = {$t->term_taxonomy_id}";
 				}
 			}
@@ -100,6 +107,8 @@ function limit_archive_links_by_terms(): void {
 /**
  * Limits adjacent posts with multiple taxonomies.
  *
+ * @psalm-suppress MissingClosureParamType
+ *
  * @param string|string[] $taxonomy_s A taxonomy slug or array of taxonomy slugs.
  * @param string          $post_type  Post type.
  */
@@ -109,16 +118,16 @@ function limit_adjacent_post_with_multiple_taxonomy( $taxonomy_s, string $post_t
 	foreach ( array( 'next', 'previous' ) as $adj ) {
 		add_filter(
 			"get_{$adj}_post_join",
-			function ( $join, $in_same_term, $excluded_terms, $taxonomy, $post ) use ( $txs, $post_type ) {
-				return _cb_get_adjacent_post_join( $join, $in_same_term, $excluded_terms, $taxonomy, $post, $txs, $post_type );
+			function ( string $join, bool $in_same_term, $_excluded_terms, string $_taxonomy, \WP_Post $post ) use ( $txs, $post_type ) {
+				return _cb_get_adjacent_post_join( $join, $in_same_term, $post, $txs, $post_type );
 			},
 			10,
 			5
 		);
 		add_filter(
 			"get_{$adj}_post_where",
-			function ( $where, $in_same_term, $excluded_terms, $taxonomy, $post ) use ( $txs, $post_type ) {
-				return _cb_get_adjacent_post_where( $where, $in_same_term, $excluded_terms, $taxonomy, $post, $txs, $post_type );
+			function ( string $where, bool $in_same_term, $_excluded_terms, string $_taxonomy, \WP_Post $post ) use ( $txs, $post_type ) {
+				return _cb_get_adjacent_post_where( $where, $in_same_term, $post, $txs, $post_type );
 			},
 			10,
 			5
@@ -129,15 +138,13 @@ function limit_adjacent_post_with_multiple_taxonomy( $taxonomy_s, string $post_t
 /**
  * Callback function for 'get_{$adjacent}_post_join' filter.
  *
- * @param string       $join             The JOIN clause in the SQL.
- * @param bool         $in_same_term     Whether post should be in a same taxonomy term.
- * @param int[]|string $excluded_terms   Array of excluded term IDs.
- * @param string       $taxonomy         Taxonomy. Used to identify the term used when `$in_same_term` is true.
- * @param \WP_Post     $post             WP_Post object.
- * @param string[]     $target_txs       Target taxonomies.
- * @param string       $target_post_type Target post type.
+ * @param string   $join             The JOIN clause in the SQL.
+ * @param bool     $in_same_term     Whether post should be in a same taxonomy term.
+ * @param \WP_Post $post             WP_Post object.
+ * @param string[] $target_txs       Target taxonomies.
+ * @param string   $target_post_type Target post type.
  */
-function _cb_get_adjacent_post_join( string $join, bool $in_same_term, $excluded_terms, string $taxonomy, \WP_Post $post, array $target_txs, string $target_post_type ): string {
+function _cb_get_adjacent_post_join( string $join, bool $in_same_term, \WP_Post $post, array $target_txs, string $target_post_type ): string {
 	if ( ! $in_same_term || $post->post_type !== $target_post_type ) {
 		return $join;
 	}
@@ -152,21 +159,24 @@ function _cb_get_adjacent_post_join( string $join, bool $in_same_term, $excluded
 /**
  * Callback function for 'get_{$adjacent}_post_where' filter.
  *
- * @param string       $where            The JOIN clause in the SQL.
- * @param bool         $in_same_term     Whether post should be in a same taxonomy term.
- * @param int[]|string $excluded_terms   Array of excluded term IDs.
- * @param string       $taxonomy         Taxonomy. Used to identify the term used when `$in_same_term` is true.
- * @param \WP_Post     $post             WP_Post object.
- * @param string[]     $target_txs       Target taxonomies.
- * @param string       $target_post_type Target post type.
+ * @param string   $where            The JOIN clause in the SQL.
+ * @param bool     $in_same_term     Whether post should be in a same taxonomy term.
+ * @param \WP_Post $post             WP_Post object.
+ * @param string[] $target_txs       Target taxonomies.
+ * @param string   $target_post_type Target post type.
  */
-function _cb_get_adjacent_post_where( string $where, bool $in_same_term, $excluded_terms, string $taxonomy, \WP_Post $post, array $target_txs, string $target_post_type ): string {
+function _cb_get_adjacent_post_where( string $where, bool $in_same_term, \WP_Post $post, array $target_txs, string $target_post_type ): string {
 	if ( ! $in_same_term || $post->post_type !== $target_post_type ) {
 		return $where;
 	}
 	foreach ( $target_txs as $i => $tx ) {
+		/**
+		 *  Term taxonomy IDs. This is determined by $args['fields'] being 'tt_ids'.
+		 *
+		 * @var int[]|\WP_Error $tt_ids
+		 */
 		$tt_ids = wp_get_object_terms( $post->ID, $tx, array( 'fields' => 'tt_ids' ) );
-		if ( $tt_ids && ! is_wp_error( $tt_ids ) ) {
+		if ( is_array( $tt_ids ) ) {
 			$where .= " AND tr_wpinc_taxo$i.term_taxonomy_id IN (" . implode( ',', $tt_ids ) . ')';
 		}
 	}
@@ -187,8 +197,13 @@ function _cb_get_adjacent_post_where( string $where, bool $in_same_term, $exclud
 function count_post_with_term( \WP_Term $term, array $posts ): array {
 	$ts_pids = array();
 	foreach ( $posts as $p ) {
+		/**
+		 * Slugs. This is determined by $args['fields'] being 'slugs'.
+		 *
+		 * @var string[]|\WP_Error $slugs
+		 */
 		$slugs = wp_get_object_terms( $p->ID, $term->taxonomy, array( 'fields' => 'slugs' ) );
-		if ( ! is_wp_error( $slugs ) ) {
+		if ( is_array( $slugs ) ) {
 			foreach ( $slugs as $s ) {
 				if ( ! isset( $ts_pids[ $s ] ) ) {
 					$ts_pids[ $s ] = array();
@@ -206,19 +221,24 @@ function count_post_with_term( \WP_Term $term, array $posts ): array {
 	foreach ( $ts_pids as $slug => $ids ) {
 		$c = count( $ids );
 		if ( $c > 0 ) {
-			$counts[ (string) $slug ] = $c;
+			$counts[ $slug ] = $c;
 		}
 	}
-	return $counts;
+	return $counts;  // @phpstan-ignore-line
 }
 
 /**
  * Counts posts with child terms.
  *
- * @param \WP_Term                       $term    Term.
- * @param array<string, array<int, int>> $ts_pids An array of term slug to post IDs.
+ * @param \WP_Term                     $term    Term.
+ * @param array<string, array<int, 1>> $ts_pids An array of term slug to post IDs.
  */
 function _count_post_with_child_term( \WP_Term $term, array &$ts_pids ): void {
+	/**
+	 * Terms. This is determined by $args['fields'] being 'all'.
+	 *
+	 * @var \WP_Term[]|\WP_Error $child
+	 */
 	$child = get_terms(
 		array(
 			'taxonomy'   => $term->taxonomy,

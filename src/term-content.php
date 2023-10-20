@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-08-31
+ * @version 2023-10-20
  */
 
 namespace wpinc\taxo;
@@ -20,8 +20,9 @@ namespace wpinc\taxo;
 function add_term_content_field( string $taxonomy, string $key, string $label_suffix = '', int $priority = 10 ): void {
 	add_action(
 		"{$taxonomy}_edit_form_fields",
-		function ( $term ) use ( $key, $label_suffix ) {
+		function ( \WP_Term $term ) use ( $key, $label_suffix ) {
 			$cont = get_term_meta( $term->term_id, $key, true );
+			$cont = is_string( $cont ) ? $cont : '';
 			?>
 			<tr class="form-field">
 				<th scope="row">
@@ -35,7 +36,7 @@ function add_term_content_field( string $taxonomy, string $key, string $label_su
 	);
 	add_action(
 		"edited_$taxonomy",
-		function ( $term_id ) use ( $key ) {
+		function ( int $term_id ) use ( $key ) {
 			if ( ! isset( $_POST[ $key ] ) ) {  // phpcs:ignore
 				return;  // When called through bulk edit.
 			}
@@ -59,7 +60,7 @@ function add_term_content_field( string $taxonomy, string $key, string $label_su
  */
 function get_term_content( \WP_Term $term, string $key ): string {
 	$c = get_term_meta( $term->term_id, $key, true );
-	if ( empty( $c ) ) {
+	if ( ! is_string( $c ) || empty( $c ) ) {
 		return '';
 	}
 	// Apply the filters for 'the_content'.
@@ -70,7 +71,7 @@ function get_term_content( \WP_Term $term, string $key ): string {
 	$c = wpautop( $c );
 	$c = shortcode_unautop( $c );
 	$c = prepend_attachment( $c );
-	$c = wp_make_content_images_responsive( $c );
+	$c = wp_filter_content_tags( $c );
 	$c = capital_P_dangit( $c );
 	$c = do_shortcode( $c );
 	$c = convert_smilies( $c );

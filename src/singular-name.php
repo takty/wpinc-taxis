@@ -4,18 +4,24 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-08-30
+ * @version 2023-10-20
  */
 
-namespace wpinc\taxo {
-	/**
+namespace wpinc\taxo {  // phpcs:ignore
+	/** phpcs:ignore
 	 * Enables singular name for each terms.
 	 *
-	 * @param array<string, mixed> $args {
+	 * phpcs:ignore
+	 * @param array{
+	 *     taxonomies?       : string[],
+	 *     singular_name_key?: string,
+	 * } $args Configuration arguments.
+	 *
+	 * $args {
 	 *     Configuration arguments.
 	 *
-	 *     @type array  'taxonomies'        Array of taxonomy slugs.
-	 *     @type string 'singular_name_key' Key of term metadata for default singular names. Default '_singular_name'.
+	 *     @type string[] 'taxonomies'        Array of taxonomy slugs.
+	 *     @type string   'singular_name_key' Key of term metadata for a singular name. Default '_singular_name'.
 	 * }
 	 */
 	function enable_singular_name( array $args ): void {
@@ -27,7 +33,7 @@ namespace wpinc\taxo {
 		$txs = $args['taxonomies'];
 
 		foreach ( $txs as $tx ) {
-			add_action( "{$tx}_edit_form_fields", '\wpinc\taxo\singular_name\_cb_tx_edit_form_fields', 10, 2 );
+			add_action( "{$tx}_edit_form_fields", '\wpinc\taxo\singular_name\_cb_tx_edit_form_fields', 10, 1 );
 			add_action( "edited_{$tx}", '\wpinc\taxo\singular_name\_cb_edited_tx', 10, 1 );
 		}
 
@@ -40,22 +46,22 @@ namespace wpinc\taxo {
 
 		$inst = \wpinc\taxo\singular_name\_get_instance();
 		foreach ( $txs as $tx ) {
-			$inst->txs[] = $tx;
+			$inst->txs[] = $tx;  // @phpstan-ignore-line
 		}
-		$inst->key = $args['default_singular_name_key'];
+		$inst->key = $args['singular_name_key'];  // @phpstan-ignore-line
 	}
 }
 
-namespace wpinc\taxo\singular_name {
+namespace wpinc\taxo\singular_name {  // phpcs:ignore
 	/**
 	 * Callback function for '{$taxonomy}_edit_form_fields' action.
 	 *
-	 * @param \WP_Term $term     Current taxonomy term object.
-	 * @param string   $taxonomy Current taxonomy slug.
+	 * @param \WP_Term $term Current taxonomy term object.
 	 */
-	function _cb_tx_edit_form_fields( \WP_Term $term, string $taxonomy ): void {
+	function _cb_tx_edit_form_fields( \WP_Term $term ): void {
 		$key = _get_instance()->key;
 		$val = get_term_meta( $term->term_id, $key, true );
+		$val = is_string( $val ) ? $val : '';
 		?>
 		<tr class="form-field">
 			<th>
@@ -92,6 +98,7 @@ namespace wpinc\taxo\singular_name {
 	 * Callback function for 'get_{$taxonomy}' filter.
 	 *
 	 * @access private
+	 * @psalm-suppress UndefinedPropertyAssignment
 	 *
 	 * @param \WP_Term $t Term object.
 	 * @return \WP_Term The filtered term.
@@ -101,7 +108,7 @@ namespace wpinc\taxo\singular_name {
 			if ( ! isset( $t->singular_name ) ) {
 				$sn = get_term_meta( $t->term_id, _get_instance()->key, true );
 
-				$t->singular_name = empty( $sn ) ? $t->name : $sn;
+				$t->singular_name = empty( $sn ) ? $t->name : $sn;  // @phpstan-ignore-line
 			}
 		}
 		return $t;
@@ -116,7 +123,10 @@ namespace wpinc\taxo\singular_name {
 	 *
 	 * @access private
 	 *
-	 * @return object Instance.
+	 * @return object{
+	 *     key: string,
+	 *     txs: string[],
+	 * } Instance.
 	 */
 	function _get_instance(): object {
 		static $values = null;
@@ -129,7 +139,7 @@ namespace wpinc\taxo\singular_name {
 			 *
 			 * @var string
 			 */
-			public $key = null;
+			public $key = '';
 
 			/**
 			 * The taxonomies.

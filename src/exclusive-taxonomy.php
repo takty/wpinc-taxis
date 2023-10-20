@@ -4,10 +4,12 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-08-31
+ * @version 2023-10-20
  */
 
 namespace wpinc\taxo\exclusive_taxonomy;
+
+require_once __DIR__ . '/assets/asset-url.php';
 
 /**
  * Makes taxonomies exclusive.
@@ -39,7 +41,7 @@ function _initialize_hooks(): void {
 	}
 	add_action( 'set_object_terms', '\wpinc\taxo\exclusive_taxonomy\_cb_set_object_terms', 10, 6 );
 
-	add_action( 'current_screen', '\wpinc\taxo\exclusive_taxonomy\_cb_current_screen' );
+	add_action( 'current_screen', '\wpinc\taxo\exclusive_taxonomy\_cb_current_screen', 10, 0 );
 }
 
 /**
@@ -99,13 +101,13 @@ function _cb_admin_print_footer_scripts(): void {
  * Callback function for 'set_object_terms' action.
  *
  * @param int            $object_id  Object ID.
- * @param int[]|string[] $terms      An array of object term IDs or slugs.
+ * @param int[]|string[] $_terms     An array of object term IDs or slugs.
  * @param int[]          $tt_ids     An array of term taxonomy IDs.
  * @param string         $taxonomy   Taxonomy slug.
- * @param bool           $append     Whether to append new terms to the old terms.
+ * @param bool           $_append    Whether to append new terms to the old terms.
  * @param int[]          $old_tt_ids Old array of term taxonomy IDs.
  */
-function _cb_set_object_terms( int $object_id, array $terms, array $tt_ids, string $taxonomy, bool $append, array $old_tt_ids ): void {
+function _cb_set_object_terms( int $object_id, array $_terms, array $tt_ids, string $taxonomy, bool $_append, array $old_tt_ids ): void {
 	$inst = _get_instance();
 
 	if ( in_array( $taxonomy, $inst->txs, true ) ) {
@@ -130,6 +132,9 @@ function _cb_set_object_terms( int $object_id, array $terms, array $tt_ids, stri
 
 /**
  * Sorts term taxonomy ids when ordered term is activated.
+ *
+ * @access private
+ * @psalm-suppress UnusedParam, UnusedVariable
  *
  * @param int[]  $tt_ids   Array of term_taxonomy_ids.
  * @param string $taxonomy Taxonomy slug.
@@ -227,7 +232,9 @@ function _cb_admin_print_footer_scripts_ce(): void {
  *
  * @access private
  *
- * @return object Instance.
+ * @return object{
+ *     txs: string[],
+ * } Instance.
  */
 function _get_instance(): object {
 	static $values = null;
