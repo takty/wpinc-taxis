@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2023-11-04
  */
 
 declare(strict_types=1);
@@ -13,6 +13,8 @@ namespace wpinc\taxo;
 
 /**
  * Disables sorting in taxonomy metaboxes for classic editor.
+ *
+ * @global string $pagenow
  */
 function disable_taxonomy_metabox_sorting(): void {
 	global $pagenow;
@@ -32,6 +34,8 @@ function disable_taxonomy_metabox_sorting(): void {
 
 /**
  * Removes term description form from admin.
+ *
+ * @global string $pagenow
  *
  * @param string|string[] $taxonomy_s A taxonomy slug or an array of taxonomy slugs.
  */

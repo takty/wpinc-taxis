@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2023-11-04
  */
 
 declare(strict_types=1);
@@ -67,6 +67,8 @@ function _cb_rest_prepare_taxonomy( \WP_REST_Response $response, \WP_Taxonomy $i
 
 /**
  * Initializes hooks.
+ *
+ * @global string $pagenow
  */
 function _initialize_hooks(): void {
 	global $pagenow;
@@ -99,6 +101,7 @@ function _cb_admin_init(): void {
  * Converts taxonomy slugs to objects.
  *
  * @access private
+ * @global \WP_Taxonomy[] $wp_taxonomies
  *
  * @param string[] $tx_slugs Taxonomy slugs.
  * @return \WP_Taxonomy[] Taxonomy objects.
@@ -124,6 +127,8 @@ function _taxonomy_slugs_to_objects( array $tx_slugs ): array {
 
 /**
  * Callback function for 'current_screen' action.
+ *
+ * @global string $pagenow
  */
 function _cb_current_screen(): void {
 	global $pagenow;
@@ -166,6 +171,8 @@ function _cb_enqueue_block_editor_assets(): void {
 
 /**
  * Makes JSON string of target taxonomies.
+ *
+ * @global \WP_Taxonomy[] $wp_taxonomies
  *
  * @param string[] $tx_slugs Taxonomy slugs.
  * @return string JSON string.

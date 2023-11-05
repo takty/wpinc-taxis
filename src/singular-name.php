@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2023-11-04
  */
 
 declare(strict_types=1);
@@ -13,6 +13,7 @@ namespace wpinc\taxo {  // phpcs:ignore
 	/** phpcs:ignore
 	 * Enables singular name for each terms.
 	 *
+	 * @global string $pagenow
 	 * phpcs:ignore
 	 * @param array{
 	 *     taxonomies?       : string[],

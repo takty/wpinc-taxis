@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2023-11-04
  */
 
 declare(strict_types=1);
@@ -35,6 +35,8 @@ function add_taxonomy( $taxonomy_s ): void {
 
 /**
  * Initializes hooks.
+ *
+ * @global string $pagenow
  */
 function _initialize_hooks(): void {
 	global $pagenow;
@@ -164,6 +166,8 @@ function _sort_term_taxonomy_ids( array $tt_ids, string $taxonomy ): array {
 
 /**
  * Callback function for 'current_screen' action.
+ *
+ * @global string $pagenow
  */
 function _cb_current_screen(): void {
 	global $pagenow;

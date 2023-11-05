@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2023-11-04
  */
 
 declare(strict_types=1);
@@ -139,6 +139,8 @@ function limit_adjacent_post_with_multiple_taxonomy( $taxonomy_s, string $post_t
 
 /**
  * Callback function for 'get_{$adjacent}_post_join' filter.
+ *
+ * @global \wpdb $wpdb
  *
  * @param string   $join             The JOIN clause in the SQL.
  * @param bool     $in_same_term     Whether post should be in a same taxonomy term.
