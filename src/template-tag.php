@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2023-11-06
  */
 
 declare(strict_types=1);
@@ -284,7 +284,6 @@ function _insert_root( array $terms ): array {
  * @param \WP_Term[] $terms Terms.
  * phpcs:ignore
  * @param array{
- *     terms?       : \WP_Term[],
  *     current_term?: \WP_Term|null,
  *     do_add_link? : bool,
  *     singular?    : bool,
@@ -294,7 +293,6 @@ function _insert_root( array $terms ): array {
  * $args {
  *     Arguments.
  *
- *     @type \WP_Term[]    'terms'        Terms.
  *     @type \WP_Term|null 'current_term' Current term.
  *     @type bool          'do_add_link'  Whether to make items link.
  *     @type bool          'singular'     Whether to use singular label when available.
