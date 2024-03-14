@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-11-04
+ * @version 2024-03-13
  */
 
 declare(strict_types=1);
@@ -90,7 +90,7 @@ namespace wpinc\taxo\singular_name {  // phpcs:ignore
 			return;  // When called through bulk edit.
 		}
 		$val = $_POST[ $key ];  // phpcs:ignore
-		if ( empty( $val ) ) {
+		if ( ! is_string( $val ) || '' === $val ) {  // Check for non-empty-string.
 			delete_term_meta( $term_id, $key );
 		} else {
 			update_term_meta( $term_id, $key, $val );
@@ -111,7 +111,7 @@ namespace wpinc\taxo\singular_name {  // phpcs:ignore
 			if ( ! isset( $t->singular_name ) ) {
 				$sn = get_term_meta( $t->term_id, _get_instance()->key, true );
 
-				$t->singular_name = empty( $sn ) ? $t->name : $sn;  // @phpstan-ignore-line
+				$t->singular_name = ( '' === $sn ) ? $t->name : $sn;  // @phpstan-ignore-line
 			}
 		}
 		return $t;

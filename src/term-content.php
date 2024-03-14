@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2024-03-14
  */
 
 declare(strict_types=1);
@@ -43,7 +43,7 @@ function add_term_content_field( string $taxonomy, string $key, string $label_su
 				return;  // When called through bulk edit.
 			}
 			$val = $_POST[ $key ];  // phpcs:ignore
-			if ( empty( $val ) ) {
+			if ( ! is_string( $val ) || '' === $val ) {  // Check for non-empty-string.
 				delete_term_meta( $term_id, $key );
 			} else {
 				$val = apply_filters( 'content_save_pre', $val );
@@ -62,7 +62,7 @@ function add_term_content_field( string $taxonomy, string $key, string $label_su
  */
 function get_term_content( \WP_Term $term, string $key ): string {
 	$c = get_term_meta( $term->term_id, $key, true );
-	if ( ! is_string( $c ) || empty( $c ) ) {
+	if ( ! is_string( $c ) || '' === $c ) {  // Check for non-empty-string.
 		return '';
 	}
 	// Apply the filters for 'the_content'.

@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2024-03-12
  */
 
 declare(strict_types=1);
@@ -19,7 +19,7 @@ namespace wpinc\taxo;
  *     taxonomy        : string,
  *     slug_to_label?  : array<string, string|array{string, array<string, mixed>}>,
  *     do_force_update?: bool,
- *     meta?           : array{ delimiter: string, keys: string[] }|null,
+ *     meta?           : array{ delimiter: non-empty-string, keys: string[] }|null,
  *     orders?         : array|null,
  *     order_key?      : string,
  * } $args Arguments.
@@ -57,6 +57,7 @@ function add_terms( array $args ): void {  // @phpstan-ignore-line
 		'delimiter' => '|',
 		'keys'      => array(),
 	);
+	/** @psalm-suppress InvalidArgument */  // phpcs:ignore
 	_add_terms( $args, $args['slug_to_label'] );
 }
 
@@ -68,7 +69,7 @@ function add_terms( array $args ): void {  // @phpstan-ignore-line
  * @param array{
  *     taxonomy       : string,
  *     do_force_update: bool,
- *     meta           : array{ delimiter: string, keys: string[] },
+ *     meta           : array{ delimiter: non-empty-string, keys: string[] },
  *     orders         : array|null,
  *     order_key      : string,
  * } $args Arguments.
@@ -87,9 +88,9 @@ function _add_terms( array $args, array $slug_to_label, int $parent_id = 0, int 
 
 	foreach ( $slug_to_label as $slug => $data ) {
 		list( $l, $sl ) = is_array( $data ) ? $data : array( $data, null );
-
+		/** @psalm-suppress InvalidArgument */  // phpcs:ignore
 		$term_id = _add_term_one( $args, $slug, $l, $parent_id, $idx );
-		if ( $term_id && $sl ) {
+		if ( is_int( $term_id ) && is_array( $sl ) ) {
 			_add_terms( $args, $sl, $term_id, $idx, $depth + 1 );  // @phpstan-ignore-line
 		}
 		$idx += $order_inc;
@@ -104,7 +105,7 @@ function _add_terms( array $args, array $slug_to_label, int $parent_id = 0, int 
  * @param array{
  *     taxonomy       : string,
  *     do_force_update: bool,
- *     meta           : array{ delimiter: string, keys: string[] }|null,
+ *     meta           : array{ delimiter: non-empty-string, keys: string[] }|null,
  *     order_key      : string,
  * } $args Arguments.
  * @param string $slug      Slug.
@@ -118,7 +119,8 @@ function _add_term_one( array $args, string $slug, string $label, int $parent_id
 	if ( $meta ) {
 		$meta_keys = $meta['keys'];
 		$meta_vals = explode( $meta['delimiter'], $label );
-		if ( is_array( $meta_vals ) ) {
+		/** @psalm-suppress RedundantConditionGivenDocblockType */  // phpcs:ignore
+		if ( is_array( $meta_vals ) ) {  // For PHP 7.
 			$label = array_shift( $meta_vals );
 		}
 	}
@@ -127,7 +129,7 @@ function _add_term_one( array $args, string $slug, string $label, int $parent_id
 	$ret = null;
 	if ( false === $t ) {
 		$ret = wp_insert_term(
-			$label,  // @phpstan-ignore-line
+			$label,
 			$args['taxonomy'],
 			array(
 				'slug'   => $slug,
@@ -135,12 +137,13 @@ function _add_term_one( array $args, string $slug, string $label, int $parent_id
 			)
 		);
 	} elseif ( $t instanceof \WP_Term && $args['do_force_update'] ) {
+		/** @psalm-suppress InvalidArgument */  // phpcs:ignore
 		$ret = wp_update_term( $t->term_id, $args['taxonomy'], array( 'name' => $label ) );
 	}
 	if ( is_wp_error( $ret ) ) {
 		$ret = null;
 	}
-	if ( $ret ) {
+	if ( is_array( $ret ) ) {
 		if ( $args['order_key'] ) {
 			update_term_meta( $ret['term_id'], $args['order_key'], $idx );
 		}
@@ -158,5 +161,5 @@ function _add_term_one( array $args, string $slug, string $label, int $parent_id
 			}
 		}
 	}
-	return $ret ? $ret['term_id'] : null;
+	return is_array( $ret ) ? $ret['term_id'] : null;
 }

@@ -4,7 +4,7 @@
  *
  * @package Wpinc
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2024-03-12
  */
 
 declare(strict_types=1);
@@ -51,7 +51,7 @@ if ( ! function_exists( '\wpinc\abs_url' ) ) {
 	 */
 	function abs_url( string $base, string $rel ): string {
 		$scheme = wp_parse_url( $rel, PHP_URL_SCHEME );
-		if ( false === $scheme || null !== $scheme ) {
+		if ( false === $scheme || is_string( $scheme ) ) {
 			return $rel;
 		}
 		$base = trailingslashit( $base );

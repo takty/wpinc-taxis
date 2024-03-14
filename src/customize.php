@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-11-04
+ * @version 2024-03-14
  */
 
 declare(strict_types=1);
@@ -56,11 +56,13 @@ function remove_term_description( $taxonomy_s ): void {
 					<?php
 				}
 			},
-			99
+			99,
+			0
 		);
 	}
 	// The below is called when both $pagenow is 'edit-tags.php' and AJAX call.
 	foreach ( $txs as $tx ) {
+		/** @psalm-suppress HookNotFound */  // phpcs:ignore
 		add_filter(
 			"manage_edit-{$tx}_columns",
 			function ( array $columns ): array {
@@ -68,6 +70,7 @@ function remove_term_description( $taxonomy_s ): void {
 				return $columns;
 			}
 		);
+		/** @psalm-suppress HookNotFound */  // phpcs:ignore
 		add_filter(
 			"manage_edit-{$tx}_sortable_columns",
 			function ( array $sortable ): array {
@@ -121,7 +124,7 @@ function set_taxonomy_default_term( string $taxonomy, string $default_term_slug,
 	if ( ! is_admin() ) {
 		return;
 	}
-	if ( $post_type_s ) {
+	if ( null !== $post_type_s ) {
 		$pts = is_array( $post_type_s ) ? $post_type_s : array( $post_type_s );
 		foreach ( $pts as $pt ) {
 			add_action(

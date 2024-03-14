@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-11-04
+ * @version 2024-03-13
  */
 
 declare(strict_types=1);
@@ -19,17 +19,12 @@ function add_term_ancestors_to_post_class(): void {
 		'post_class',
 		function ( array $classes, array $cls, int $post_id ) {
 			$txs = get_taxonomies( array( 'public' => true ) );
-			/**
-			 * Taxonomies.
-			 *
-			 * @var string[] $txs
-			 */
 			$txs = apply_filters( 'post_class_taxonomies', $txs, $post_id, $classes, $cls );
 
 			$cs = array();
 			foreach ( $txs as $tx ) {
 				$pt = get_post_type( $post_id );
-				if ( $pt && is_object_in_taxonomy( $pt, $tx ) ) {
+				if ( is_string( $pt ) && is_object_in_taxonomy( $pt, $tx ) ) {
 					$as = array();
 					$ts = get_the_terms( $post_id, $tx );
 					if ( is_array( $ts ) ) {
@@ -39,7 +34,7 @@ function add_term_ancestors_to_post_class(): void {
 					}
 					foreach ( $as as $a ) {
 						$t = get_term( $a );
-						if ( ! ( $t instanceof \WP_Term ) || empty( $t->slug ) ) {
+						if ( ! ( $t instanceof \WP_Term ) || '' === $t->slug ) {
 							continue;
 						}
 
@@ -88,7 +83,6 @@ function limit_archive_links_by_terms(): void {
 	add_filter(
 		'getarchives_where',
 		function ( string $where, array $parsed_args ) {
-			global $wpdb;
 			if ( isset( $parsed_args['taxonomy'] ) && isset( $parsed_args['term'] ) ) {
 				$t = get_term_by( 'slug', $parsed_args['term'], $parsed_args['taxonomy'] );
 				if ( $t instanceof \WP_Term ) {

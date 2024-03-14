@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-11-04
+ * @version 2024-03-14
  */
 
 declare(strict_types=1);
@@ -41,7 +41,7 @@ function add_taxonomy( $taxonomy_s ): void {
 function _initialize_hooks(): void {
 	global $pagenow;
 	if ( 'edit.php' === $pagenow ) {
-		add_action( 'admin_print_footer_scripts', '\wpinc\taxo\exclusive_taxonomy\_cb_admin_print_footer_scripts' );
+		add_action( 'admin_print_footer_scripts', '\wpinc\taxo\exclusive_taxonomy\_cb_admin_print_footer_scripts', 10, 0 );
 	}
 	add_action( 'set_object_terms', '\wpinc\taxo\exclusive_taxonomy\_cb_set_object_terms', 10, 6 );
 
@@ -174,9 +174,9 @@ function _cb_current_screen(): void {
 	if ( 'post-new.php' === $pagenow || 'post.php' === $pagenow ) {
 		$cs = get_current_screen();
 		if ( $cs && $cs->is_block_editor() ) {
-			add_action( 'enqueue_block_editor_assets', '\wpinc\taxo\exclusive_taxonomy\_cb_enqueue_block_editor_assets' );
+			add_action( 'enqueue_block_editor_assets', '\wpinc\taxo\exclusive_taxonomy\_cb_enqueue_block_editor_assets', 10, 0 );
 		} else {
-			add_action( 'admin_print_footer_scripts', '\wpinc\taxo\exclusive_taxonomy\_cb_admin_print_footer_scripts_ce' );
+			add_action( 'admin_print_footer_scripts', '\wpinc\taxo\exclusive_taxonomy\_cb_admin_print_footer_scripts_ce', 10, 0 );
 		}
 	}
 }

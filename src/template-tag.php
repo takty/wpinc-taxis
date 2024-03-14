@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-11-06
+ * @version 2024-03-14
  */
 
 declare(strict_types=1);
@@ -24,8 +24,8 @@ require_once __DIR__ . '/utility.php';
  */
 function get_term_name( \WP_Term $term, bool $singular = false ): string {
 	if ( $singular ) {
-		$name_s = $term->singular_name;  // @phpstan-ignore-line
-		if ( ! empty( $name_s ) ) {
+		$name_s = $term->singular_name ?? '';
+		if ( is_string( $name_s ) && '' !== $name_s ) {  // Check for non-empty-string.
 			return $name_s;
 		}
 	}

@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2024-03-14
  */
 
 declare(strict_types=1);
@@ -57,7 +57,7 @@ function activate( array $args = array() ): void {
 			_add_hook_for_specific_taxonomy( $tx );
 		}
 		if ( 'edit-tags.php' === $pagenow ) {
-			add_action( 'admin_head', '\wpinc\taxo\ordered_term\_cb_admin_head' );
+			add_action( 'admin_head', '\wpinc\taxo\ordered_term\_cb_admin_head', 10, 0 );
 			add_action( 'quick_edit_custom_box', '\wpinc\taxo\ordered_term\_cb_quick_edit_custom_box', 10, 3 );
 		}
 	}
@@ -73,8 +73,11 @@ function activate( array $args = array() ): void {
  * @param string $tx A taxonomy slug.
  */
 function _add_hook_for_specific_taxonomy( string $tx ): void {
+	/** @psalm-suppress HookNotFound */  // phpcs:ignore
 	add_filter( "manage_edit-{$tx}_columns", '\wpinc\taxo\ordered_term\_cb_manage_edit_taxonomy_columns' );
+	/** @psalm-suppress HookNotFound */  // phpcs:ignore
 	add_filter( "manage_edit-{$tx}_sortable_columns", '\wpinc\taxo\ordered_term\_cb_manage_edit_taxonomy_sortable_columns' );
+	/** @psalm-suppress HookNotFound */  // phpcs:ignore
 	add_filter( "manage_{$tx}_custom_column", '\wpinc\taxo\ordered_term\_cb_manage_taxonomy_custom_column', 10, 3 );
 	add_action( "{$tx}_edit_form_fields", '\wpinc\taxo\ordered_term\_cb_taxonomy_edit_form_fields' );
 	add_action( "edited_{$tx}", '\wpinc\taxo\ordered_term\_cb_edited_taxonomy', 10, 2 );
@@ -405,8 +408,8 @@ function get_post_meta_key_of_post_term_order( string $taxonomy ): string {
 function _cb_save_post( int $post_id ): void {
 	$inst = _get_instance();
 
-	$post_type = get_post_type( $post_id );
-	if ( ! in_array( $post_type, $inst->post_term_order_post_types, true ) ) {
+	$pt = get_post_type( $post_id );
+	if ( ! in_array( $pt, $inst->post_term_order_post_types, true ) ) {
 		return;
 	}
 	foreach ( $inst->txs as $tx ) {

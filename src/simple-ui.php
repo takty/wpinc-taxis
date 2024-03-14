@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-11-04
+ * @version 2024-03-14
  */
 
 declare(strict_types=1);
@@ -75,7 +75,7 @@ function _initialize_hooks(): void {
 
 	if ( wp_doing_ajax() || 'edit.php' === $pagenow || 'post-new.php' === $pagenow || 'post.php' === $pagenow ) {
 		// Change term selection UI from textarea to checkboxes for classic editor and list.
-		add_action( 'admin_init', '\wpinc\taxo\simple_ui\_cb_admin_init' );
+		add_action( 'admin_init', '\wpinc\taxo\simple_ui\_cb_admin_init', 10, 0 );
 	}
 	add_action( 'current_screen', '\wpinc\taxo\simple_ui\_cb_current_screen', 10, 0 );
 }
@@ -136,10 +136,10 @@ function _cb_current_screen(): void {
 	if ( 'post-new.php' === $pagenow || 'post.php' === $pagenow ) {
 		$cs = get_current_screen();
 		if ( $cs && $cs->is_block_editor() ) {
-			add_action( 'enqueue_block_editor_assets', '\wpinc\taxo\simple_ui\_cb_enqueue_block_editor_assets' );
+			add_action( 'enqueue_block_editor_assets', '\wpinc\taxo\simple_ui\_cb_enqueue_block_editor_assets', 10, 0 );
 		} else {
 			// Remove UI elements from metabox for classic editor.
-			add_action( 'admin_head', '\wpinc\taxo\simple_ui\_cb_admin_head_ce' );
+			add_action( 'admin_head', '\wpinc\taxo\simple_ui\_cb_admin_head_ce', 10, 0 );
 		}
 	}
 }

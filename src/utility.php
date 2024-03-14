@@ -4,7 +4,7 @@
  *
  * @package Wpinc Taxo
  * @author Takuto Yanagida
- * @version 2023-10-20
+ * @version 2024-03-14
  */
 
 declare(strict_types=1);
@@ -35,6 +35,7 @@ function register_post_type_specific_taxonomy( array $args, string $post_type, s
 		'with_front' => false,
 		'slug'       => "$slug/$suffix",
 	);
+	/** @psalm-suppress InvalidArgument */  // phpcs:ignore
 	register_taxonomy( "{$post_type}_$suffix", $post_type, $args );  // @phpstan-ignore-line
 	set_taxonomy_post_type_specific( array( "{$post_type}_$suffix" ), $post_type );
 }
